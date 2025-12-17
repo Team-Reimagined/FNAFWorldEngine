@@ -4,6 +4,8 @@
 
 #include <SDL2/SDL.h>
 
+#define ENGINE_VERSION "0.0.1"
+
 namespace FNAFWorldEngine {
     namespace Rendering {
         class Window {

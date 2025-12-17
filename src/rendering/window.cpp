@@ -1,5 +1,7 @@
 #include "rendering/window.hpp"
 
+#include <format>
+
 #include <spdlog/spdlog.h>
 
 namespace FNAFWorldEngine::Rendering {
@@ -13,7 +15,14 @@ namespace FNAFWorldEngine::Rendering {
             return false;
         }
 
-        this->win = SDL_CreateWindow(winTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+        this->win = SDL_CreateWindow(
+            std::format("{} - Version {}", winTitle, ENGINE_VERSION).c_str(), 
+            SDL_WINDOWPOS_CENTERED, 
+            SDL_WINDOWPOS_CENTERED, 
+            width, 
+            height, 
+            SDL_WINDOW_SHOWN
+        );
         if (this->win == nullptr) {
             spdlog::error("SDL_CreateWindow Error: {}", SDL_GetError());
             SDL_Quit();
@@ -29,6 +38,7 @@ namespace FNAFWorldEngine::Rendering {
         }
 
         this->renderLoop();
+        return true;
     }
 
     void Window::renderLoop() {
