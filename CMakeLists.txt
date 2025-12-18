@@ -17,17 +17,6 @@ find_package(SDL2_mixer CONFIG REQUIRED)
 find_package(SDL2_ttf CONFIG REQUIRED)
 
 CPMAddPackage("gh:gabime/spdlog@1.16.0")
-CPMAddPackage("gh:ocornut/imgui#v1.92.5")
-
-set(IMGUI_SOURCES
-    ${imgui_SOURCE_DIR}/imgui.cpp
-    ${imgui_SOURCE_DIR}/imgui_draw.cpp
-    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-    ${imgui_SOURCE_DIR}/imgui_tables.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer2.cpp
-)
-add_library(imgui STATIC ${IMGUI_SOURCES})
 
 target_link_libraries(FNAFWorldEngine PRIVATE 
     $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
@@ -38,10 +27,8 @@ target_link_libraries(FNAFWorldEngine PRIVATE
     $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
 
     spdlog
-    imgui
 )
 
 target_include_directories(FNAFWorldEngine PRIVATE
     include/
-    ${imgui_SOURCE_DIR}
 )

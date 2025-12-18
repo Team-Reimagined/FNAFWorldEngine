@@ -21,6 +21,21 @@ namespace FNAFWorldEngine {
              */
             bool createWindow(int width, int height, std::string winTitle);
 
+        private:
+            int winWidth, winHeight;
+            std::string winTitle;
+            bool quit;
+
+            SDL_Window* win;
+            SDL_Renderer* renderer;
+
+            /**
+             * @brief Initialize SDL_image
+             * 
+             * @return True if initialized, false if error
+             */
+            bool initializeImageExtension();
+
             /**
              * @brief The render loop for the window
              */
@@ -30,15 +45,6 @@ namespace FNAFWorldEngine {
              * @brief Cleanup SDL2 on quit
              */
             void cleanup();
-
-        private:
-            int winWidth, winHeight;
-            std::string winTitle;
-            bool quit;
-
-            SDL_Window* win;
-            SDL_Renderer* renderer;
-
         };
     }
 }
