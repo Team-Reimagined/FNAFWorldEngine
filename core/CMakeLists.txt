@@ -11,4 +11,15 @@ file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE HEADERS include/*.hpp)
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
+include(FetchContent)
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL
+    GIT_TAG release-3.4.4
+)
+FetchContent_MakeAvailable(SDL3)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    SDL3::SDL3
+)
 target_include_directories(${PROJECT_NAME} PRIVATE include/)
