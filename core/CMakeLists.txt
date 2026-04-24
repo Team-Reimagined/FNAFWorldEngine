@@ -21,10 +21,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3)
 
+FetchContent_Declare(
+    SDL3_mixer
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer
+    GIT_TAG release-3.2.0
+)
+FetchContent_MakeAvailable(SDL3_mixer)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3
+    SDL3_mixer::SDL3_mixer
 )
-target_include_directories(${PROJECT_NAME} PRIVATE include/)
+target_include_directories(${PROJECT_NAME} PUBLIC include/)
 
 if (FWE_CORE_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
