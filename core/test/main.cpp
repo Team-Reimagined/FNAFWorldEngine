@@ -1,7 +1,7 @@
 #include <Audio/AudioManager.hpp>
 
 int main() {
-    FWE::Audio::AudioManager* am = FWE::Audio::AudioManager::get();
+    FWE::Audio::AudioManager* am = FWE::Audio::AudioManager::GetInstance();
 
     am->Init();
     auto audio = am->LoadAudio("bulletproof.mp3");

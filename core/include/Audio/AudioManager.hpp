@@ -9,7 +9,7 @@
 namespace FWE::Audio {
     class AudioManager {
     public:
-        static AudioManager* get() {
+        static AudioManager* GetInstance() {
             static AudioManager instance;
             return &instance;
         }
