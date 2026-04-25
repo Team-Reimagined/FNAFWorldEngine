@@ -28,18 +28,16 @@ namespace FWE::Audio {
         return audio;
     }
 
-    MIX_Track* AudioManager::CreateTrack() {
-        MIX_Track* track = MIX_CreateTrack(this->mixer);
-        if (!track) {
-            Util::Logging::error("Couldn't create track: {}", SDL_GetError());
-            return nullptr;
-        }
+    Track* AudioManager::CreateTrack() {
+        Track* track = new Track(this->mixer);
 
         return track;
     }
 
-    void AudioManager::Play(MIX_Audio* audio, MIX_Track* track) {
-        MIX_SetTrackAudio(track, audio);
-        MIX_PlayTrack(track, 0);
+    Track* AudioManager::CreateTrack(MIX_Audio* audio) {
+        Track* track = new Track(this->mixer);
+        track->SetAudio(audio);
+
+        return track;
     }
 }

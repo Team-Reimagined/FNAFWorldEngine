@@ -4,6 +4,8 @@
 
 #include <SDL3_mixer/SDL_mixer.h>
 
+#include "Audio/types/Track.hpp"
+
 namespace FWE::Audio {
     class AudioManager {
     public:
@@ -14,9 +16,10 @@ namespace FWE::Audio {
 
         bool Init();
         MIX_Audio* LoadAudio(std::string filePath);
-        MIX_Track* CreateTrack();
-        void Play(MIX_Audio* audio, MIX_Track* track);
-    
+
+        Track* CreateTrack();
+        Track* CreateTrack(MIX_Audio* audio);
+
     private:
         MIX_Mixer* mixer;
     };

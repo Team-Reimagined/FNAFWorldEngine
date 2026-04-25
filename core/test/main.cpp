@@ -5,8 +5,9 @@ int main() {
 
     am->Init();
     auto audio = am->LoadAudio("bulletproof.mp3");
-    auto track = am->CreateTrack();
-    am->Play(audio, track);
+    auto track = am->CreateTrack(audio);
+    track->SetVolume(1.75f);
+    track->Play();
 
     while (true) {}
 }
