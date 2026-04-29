@@ -15,17 +15,6 @@ file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE HEADERS include/*.hpp)
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 
-add_library(imgui STATIC 
-    ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui.cpp
-    ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_draw.cpp
-    ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_tables.cpp
-    ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_widgets.cpp
-    ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_demo.cpp
-    ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/backends/imgui_impl_sdl3.cpp
-    ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/backends/imgui_impl_vulkan.cpp
-)
-target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src)
-
 include(FetchContent)
 FetchContent_Declare(
     SDL3
@@ -78,6 +67,21 @@ FetchContent_MakeAvailable(imgui)
 
 find_package(Vulkan)
 
+add_library(imgui STATIC 
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
+)
+target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR})
+target_link_libraries(imgui PRIVATE
+    Vulkan::Vulkan
+    SDL3::SDL3
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3
     SDL3_image::SDL3_image
@@ -122,5 +126,5 @@ endif()
 if (FWE_CORE_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
     add_executable(fwe_core_test ${TEST_SOURCES})
-    target_link_libraries(fwe_core_test PRIVATE FWECore)
+    target_link_libraries(fwe_core_test PRIVATE FWECore SDL3::SDL3 Vulkan::Vulkan imgui SDL3_mixer::SDL3_mixer)
 endif()
