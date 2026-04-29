@@ -5,6 +5,15 @@
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
     renderer->Init();
+  
+    FWE::Audio::AudioManager* am = FWE::Audio::AudioManager::GetInstance();
+
+    am->Init();
+    auto audio = am->LoadAudio("bulletproof.mp3");
+    auto track = am->CreateTrack(audio);
+    track->SetVolume(1.75f);
+    track->Play();
+  
     bool running = true;
     while (running)
     {
