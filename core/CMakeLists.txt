@@ -11,7 +11,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/lib")
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE HEADERS include/*.hpp)
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 
 include(FetchContent)
 FetchContent_Declare(
@@ -22,6 +22,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL3)
 
 FetchContent_Declare(
+    SDL3_image
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image
+    GIT_TAG release-3.4.2
+)
+FetchContent_MakeAvailable(SDL3_image)
+
+FetchContent_Declare(
     SDL3_mixer
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer
     GIT_TAG release-3.2.0
@@ -30,6 +37,7 @@ FetchContent_MakeAvailable(SDL3_mixer)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3
+    SDL3_image::SDL3_image
     SDL3_mixer::SDL3_mixer
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
@@ -37,5 +45,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC include/)
 if (FWE_CORE_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
     add_executable(fwe_core_test ${TEST_SOURCES})
-    target_link_libraries(fwe_core_test PRIVATE FWECore)
+    target_link_libraries(fwe_core_test PRIVATE FWECore SDL3_mixer::SDL3_mixer)
 endif()
