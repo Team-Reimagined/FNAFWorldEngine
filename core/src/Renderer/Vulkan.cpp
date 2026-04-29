@@ -126,7 +126,7 @@ namespace FWE::Renderer::Vulkan
 
         VK_CHECK(vkCreateImageView(device, &viewInfo, nullptr, &drawImage.imageView));
 
-        mainDeletionQueue.PushFunction([=]()
+        mainDeletionQueue.PushFunction([=, this]()
         {
             vkDestroyImageView(device, drawImage.imageView, nullptr);
             vmaDestroyImage(allocator, drawImage.image, drawImage.allocation);
@@ -154,7 +154,7 @@ namespace FWE::Renderer::Vulkan
 
         VkCommandBufferAllocateInfo cmdAllocInfo = Utils::CommandBufferAllocateInfo(immCommandPool, 1);
 
-        mainDeletionQueue.PushFunction([=]()
+        mainDeletionQueue.PushFunction([=, this]()
         {
             vkDestroyCommandPool(device, immCommandPool, nullptr);
         });
@@ -174,7 +174,7 @@ namespace FWE::Renderer::Vulkan
         }
 
         VK_CHECK(vkCreateFence(device, &fenceCreateInfo, nullptr, &immFence));
-        mainDeletionQueue.PushFunction([=]()
+        mainDeletionQueue.PushFunction([=, this]()
         {
             vkDestroyFence(device, immFence, nullptr);
         });
@@ -221,6 +221,7 @@ namespace FWE::Renderer::Vulkan
     void Vulkan::InitPipelines()
     {
         InitBackgroundPipelines();
+        InitTrianglePipeline();
     }
 
     void Vulkan::InitBackgroundPipelines()
@@ -244,13 +245,13 @@ namespace FWE::Renderer::Vulkan
         VkShaderModule gradientShader;
         if(!Utils::LoadShaderModule("../shaders/gradient_color.comp.spv", device, &gradientShader))
         {
-            //Error
+            Util::Logging::error("Error building compute shader");
         }
 
         VkShaderModule skyShader;
         if(!Utils::LoadShaderModule("../shaders/sky.comp.spv", device, &skyShader))
         {
-            //Error
+            Util::Logging::error("Error building compute shader");
         }
 
         VkPipelineShaderStageCreateInfo stageInfo {};
@@ -266,14 +267,82 @@ namespace FWE::Renderer::Vulkan
         computePipelineCreateInfo.layout = gradientPipelineLayout;
         computePipelineCreateInfo.stage = stageInfo;
 
-        VK_CHECK(vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &gradientPipeline));
+        ComputeEffect gradient;
+        gradient.layout = gradientPipelineLayout;
+        gradient.name = "gradient";
+        gradient.data = {};
+
+        gradient.data.data1 = glm::vec4(1, 0, 0, 1);
+        gradient.data.data2 = glm::vec4(0, 0, 1, 1);
+
+        VK_CHECK(vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &gradient.pipeline));
+
+        computePipelineCreateInfo.stage.module = skyShader;
+
+        ComputeEffect sky;
+        sky.layout  = gradientPipelineLayout;
+        sky.name = "sky";
+        sky.data = {};
+
+        sky.data.data1 = glm::vec4(0.1, 0.2, 0.3, 0.97);
+
+        VK_CHECK(vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &sky.pipeline));
+
+        backgroundEffects.push_back(gradient);
+        backgroundEffects.push_back(sky);
 
         vkDestroyShaderModule(device, gradientShader, nullptr);
+        vkDestroyShaderModule(device, skyShader, nullptr);
 
         mainDeletionQueue.PushFunction([&]()
         {
             vkDestroyPipelineLayout(device, gradientPipelineLayout, nullptr);
-            vkDestroyPipeline(device, gradientPipeline, nullptr);
+            vkDestroyPipeline(device, gradient.pipeline, nullptr);
+            vkDestroyPipeline(device, sky.pipeline, nullptr);
+        });
+    }
+
+    void Vulkan::InitTrianglePipeline()
+    {
+        VkShaderModule triangleFragShader;
+        if(!Utils::LoadShaderModule("../shaders/colored_triangle.frag.spv", device, &triangleFragShader))
+        {
+            Util::Logging::error("Error building fragment shader");
+        }
+        
+        VkShaderModule triangleVertShader;
+        if(!Utils::LoadShaderModule("../shaders/colored_triangle.vert.spv", device, &triangleVertShader))
+        {
+            Util::Logging::error("Error building vertex shader");
+        }
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo = Utils::PipelineLayoutCreateInfo();
+        VK_CHECK(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &trianglePipelineLayout));
+
+        Utils::PipelineBuilder pipelineBuilder;
+
+        pipelineBuilder.pipelineLayout = trianglePipelineLayout;
+
+        pipelineBuilder.SetShaders(triangleVertShader, triangleFragShader);
+        pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
+        pipelineBuilder.SetCullMode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
+        pipelineBuilder.SetMultisamplingNone();
+        pipelineBuilder.DisableBlending();
+        pipelineBuilder.DisableDepthTest();
+
+        pipelineBuilder.SetColorAttachmentFormat(drawImage.imageFormat);
+        pipelineBuilder.SetDepthFormat(VK_FORMAT_UNDEFINED);
+
+        trianglePipeline = pipelineBuilder.BuildPipeline(device);
+
+        vkDestroyShaderModule(device, triangleFragShader, nullptr);
+        vkDestroyShaderModule(device, triangleVertShader, nullptr);
+
+        mainDeletionQueue.PushFunction([&]()
+        {
+            vkDestroyPipelineLayout(device, trianglePipelineLayout, nullptr);
+            vkDestroyPipeline(device, trianglePipeline, nullptr);
         });
     }
 
@@ -326,7 +395,7 @@ namespace FWE::Renderer::Vulkan
 
         ImGui_ImplVulkan_Init(&initInfo);
 
-        mainDeletionQueue.PushFunction([=]()
+        mainDeletionQueue.PushFunction([=, this]()
         {
             ImGui_ImplVulkan_Shutdown();
             vkDestroyDescriptorPool(device, imguiPool, nullptr);
@@ -356,20 +425,29 @@ namespace FWE::Renderer::Vulkan
         VK_CHECK(vkWaitForFences(device, 1, &immFence, true, 9999999999));
     }
 
-    void PrepareImgui()
+    void Vulkan::Render()
     {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
+        if(ImGui::Begin("Background"))
+        {
+            ComputeEffect &selected = backgroundEffects[currentBackgroundEffect];
+
+            ImGui::Text("Selected Effect: ", selected.name);
+
+            ImGui::SliderInt("Effect Index", &currentBackgroundEffect, 0, backgroundEffects.size() - 1);
+
+            ImGui::InputFloat4("data1", (float*)&selected.data.data1);
+            ImGui::InputFloat4("data2", (float*)&selected.data.data2);
+            ImGui::InputFloat4("data3", (float*)&selected.data.data3);
+            ImGui::InputFloat4("data4", (float*)&selected.data.data4);
+        }
+
+        ImGui::End();
 
         ImGui::Render();
-    }
-
-    void Vulkan::Render()
-    {
-        PrepareImgui();
 
         VK_CHECK(vkWaitForFences(device, 1, &GetCurrentFrame().renderFence, true, 1000000000));
 
@@ -392,7 +470,11 @@ namespace FWE::Renderer::Vulkan
 
         DrawBackground(cmd);
 
-        Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+        DrawGeometry(cmd);
+
+        Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
         Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         Utils::CopyImageToImage(cmd, drawImage.image, swapchainImages[swapchainImageIndex], drawExtent, swapchainExtent);
@@ -430,18 +512,6 @@ namespace FWE::Renderer::Vulkan
         frame++;
     }
 
-    void Vulkan::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
-    {
-        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(targetImageView, nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-        VkRenderingInfo renderInfo = Utils::RenderingInfo(swapchainExtent, &colorAttachment, nullptr);
-
-        vkCmdBeginRendering(cmd, &renderInfo);
-
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
-
-        vkCmdEndRendering(cmd);
-    }
-
     void Vulkan::CreateSwapchain(uint32_t width, uint32_t height)
     {
         vkb::SwapchainBuilder swapchainBuilder{gpu, device, surface};
@@ -457,6 +527,8 @@ namespace FWE::Renderer::Vulkan
         swapchainImageViews = vkbSwapchain.get_image_views().value();
     }
 
+
+
     void Vulkan::DrawBackground(VkCommandBuffer cmd)
     {
         // VkClearColorValue clearValue;
@@ -467,17 +539,59 @@ namespace FWE::Renderer::Vulkan
 
         // vkCmdClearColorImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, gradientPipeline);
+        ComputeEffect effect = backgroundEffects[currentBackgroundEffect];
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
 
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, gradientPipelineLayout, 0, 1, &drawImageDescriptors, 0, nullptr);
 
-        ComputePushConstants pushConstants;
-        pushConstants.data1 = glm::vec4(1, 0, 0, 1);
-        pushConstants.data2 = glm::vec4(0, 0, 1, 1);
-
-        vkCmdPushConstants(cmd, gradientPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputePushConstants), &pushConstants);
+        vkCmdPushConstants(cmd, gradientPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputePushConstants), &effect.data);
         
         vkCmdDispatch(cmd, std::ceil(drawExtent.width / 16.0), std::ceil(drawExtent.height / 16.0), 1);
+    }
+
+    void Vulkan::DrawGeometry(VkCommandBuffer cmd)
+    {
+        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
+
+        VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
+        vkCmdBeginRendering(cmd, &renderInfo);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, trianglePipeline);
+
+        VkViewport viewport = {};
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.width = drawExtent.width;
+        viewport.height = drawExtent.height;
+        viewport.minDepth = 0.f;
+        viewport.maxDepth = 1.f;
+
+        vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset.x = 0;
+        scissor.offset.y = 0;
+        scissor.extent.width = drawExtent.width;
+        scissor.extent.height = drawExtent.height;
+
+        vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+        vkCmdDraw(cmd, 3, 1, 0, 0);
+
+        vkCmdEndRendering(cmd);
+    }
+
+    void Vulkan::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
+    {
+        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(targetImageView, nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        VkRenderingInfo renderInfo = Utils::RenderingInfo(swapchainExtent, &colorAttachment, nullptr);
+
+        vkCmdBeginRendering(cmd, &renderInfo);
+
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
+
+        vkCmdEndRendering(cmd);
     }
 
     void Vulkan::DestroySwapchain()

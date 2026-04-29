@@ -27,4 +27,8 @@ namespace FWE::Renderer::Vulkan::Utils
     VkRenderingAttachmentInfo AttachmentInfo(VkImageView view, VkClearValue *clear, VkImageLayout layout);
 
     VkRenderingInfo RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo* colorAttachment, VkRenderingAttachmentInfo* depthAttachment);
+
+    VkPipelineShaderStageCreateInfo PipelineShaderStageCreateInfo(VkShaderStageFlagBits stage, VkShaderModule shaderModule, const char *entry = "main");
+
+    VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo();
 }

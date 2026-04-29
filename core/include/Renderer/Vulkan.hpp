@@ -107,7 +107,6 @@ namespace FWE::Renderer::Vulkan
         VkDescriptorSet drawImageDescriptors;
         VkDescriptorSetLayout drawImageDescriptorLayout;
 
-        VkPipeline gradientPipeline;
         VkPipelineLayout gradientPipelineLayout;
 
         VkFence immFence;
@@ -121,11 +120,13 @@ namespace FWE::Renderer::Vulkan
         void InitDescriptors();
         void InitPipelines();
         void InitBackgroundPipelines();
+        void InitTrianglePipeline();
 
         void CreateSwapchain(uint32_t width, uint32_t height);
         void DestroySwapchain();
 
         void DrawBackground(VkCommandBuffer cmd);
+        void DrawGeometry(VkCommandBuffer cmd);
         
         void InitImgui();
         void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
@@ -137,5 +138,7 @@ namespace FWE::Renderer::Vulkan
         VkExtent2D drawExtent;
         std::vector<ComputeEffect> backgroundEffects;
         int currentBackgroundEffect {0};
+        VkPipelineLayout trianglePipelineLayout;
+        VkPipeline trianglePipeline;
     };
 }
