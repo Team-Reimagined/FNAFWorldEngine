@@ -20,8 +20,9 @@ namespace FWE::Renderer
 
     void Renderer::Render()
     {
-        SDL_RenderPresent(renderer);
-        SDL_RenderClear(renderer);
+        vulkan.Render();
+        //SDL_RenderPresent(renderer);
+        //SDL_RenderClear(renderer);
     }
 
     Renderer *Renderer::GetInstance()

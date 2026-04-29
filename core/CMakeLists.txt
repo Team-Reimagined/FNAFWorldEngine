@@ -5,11 +5,20 @@ project(FWECore VERSION 1.0.0 LANGUAGES CXX)
 
 option(FWE_CORE_BUILD_TESTS "Build Core Library Tests" ON)
 
+option(FWE_SHADER_COMPILATION "Compile Shaders" ON)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/lib")
 
-file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE SOURCES src/*.cpp 
+${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui.cpp
+${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_draw.cpp
+${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_tables.cpp
+${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_widgets.cpp
+${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/imgui_demo.cpp
+${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/backends/imgui_impl_sdl3.cpp
+${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/backends/imgui_impl_vulkan.cpp)
 file(GLOB_RECURSE HEADERS include/*.hpp)
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 
@@ -56,6 +65,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui
+    GIT_TAG v1.92.7
+)
+FetchContent_MakeAvailable(imgui)
+
 find_package(Vulkan)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -66,12 +82,43 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     vk-bootstrap::vk-bootstrap
     GPUOpen::VulkanMemoryAllocator
     Vulkan::Vulkan
+    
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include/ ${vulkanmemoryallocator_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC include/ ${vulkanmemoryallocator_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/build/_deps/imgui-src/)
 
 if (FWE_CORE_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
     add_executable(fwe_core_test ${TEST_SOURCES})
     target_link_libraries(fwe_core_test PRIVATE FWECore)
+endif()
+
+if(FWE_SHADER_COMPILATION)
+
+find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
+
+file(GLOB_RECURSE GLSL_SOURCE_FILES
+    "${CMAKE_SOURCE_DIR}/shaders/*.frag"
+    "${CMAKE_SOURCE_DIR}/shaders/*.vert"
+    "${CMAKE_SOURCE_DIR}/shaders/*.comp"
+    )
+
+foreach(GLSL ${GLSL_SOURCE_FILES})
+  message(STATUS "BUILDING SHADER")
+  get_filename_component(FILE_NAME ${GLSL} NAME)
+  set(SPIRV "${CMAKE_SOURCE_DIR}/shaders/${FILE_NAME}.spv")
+  message(STATUS ${GLSL})
+  message(STATUS COMMAND " " ${GLSL_VALIDATOR} " -V " ${GLSL} " -o "  ${SPIRV})
+  add_custom_command(
+    OUTPUT ${SPIRV}
+    COMMAND ${GLSL_VALIDATOR} -V ${GLSL} -o ${SPIRV}
+    DEPENDS ${GLSL})
+  list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach(GLSL)
+
+add_custom_target(
+    Shaders ALL
+    DEPENDS ${SPIRV_BINARY_FILES}
+)
+
 endif()

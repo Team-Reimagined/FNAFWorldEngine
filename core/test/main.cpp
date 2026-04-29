@@ -1,4 +1,6 @@
 #include "Renderer/Renderer.hpp"
+#include <thread>
+#include "backends/imgui_impl_sdl3.h"
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
@@ -18,6 +20,7 @@ int main() {
             default:
                 break;
             }
+            ImGui_ImplSDL3_ProcessEvent(&events);
         }
         renderer->Render();
     }

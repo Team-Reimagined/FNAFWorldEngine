@@ -2,27 +2,29 @@
 
 #include "VulkanTypes.hpp"
 
-namespace FWE::Renderer
+namespace FWE::Renderer::Vulkan::Utils
 {
-    VkCommandPoolCreateInfo CommandPoolCreateInfo(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags)
-    {
-        VkCommandPoolCreateInfo info = {};
-        info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        info.pNext = nullptr;
-        info.queueFamilyIndex = queueFamilyIndex;
-        info.flags = flags;
-        return info;
-    }
+    VkCommandPoolCreateInfo CommandPoolCreateInfo(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags);
 
-    VkCommandBufferAllocateInfo CommandBufferAllocateInfo(VkCommandPool pool, uint32_t count)
-    {
-        VkCommandBufferAllocateInfo info = {};
-        info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        info.pNext = nullptr;
+    VkCommandBufferAllocateInfo CommandBufferAllocateInfo(VkCommandPool pool, uint32_t count);
 
-        info.commandPool = pool;
-        info.commandBufferCount = count;
-        info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        return info;
-    }
+    VkFenceCreateInfo FenceCreateInfo(VkFenceCreateFlags flags);
+
+    VkSemaphoreCreateInfo SemaphoreCreateInfo(VkSemaphoreCreateFlags flags);
+
+    VkCommandBufferBeginInfo CommandBufferBeginInfo(VkCommandBufferUsageFlags flags);
+
+    VkSemaphoreSubmitInfo SemaphoreSubmitInfo(VkPipelineStageFlags2 stageMask, VkSemaphore semaphore);
+
+    VkCommandBufferSubmitInfo CommandBufferSubmitInfo(VkCommandBuffer cmd);
+
+    VkSubmitInfo2 SubmitInfo(VkCommandBufferSubmitInfo *cmd, VkSemaphoreSubmitInfo *signalSemaphoreInfo, VkSemaphoreSubmitInfo *waitSemaphoreInfo);
+
+    VkImageCreateInfo ImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent);
+
+    VkImageViewCreateInfo ImageViewCreateInfo(VkFormat format, VkImage image, VkImageAspectFlags aspectFlags);
+
+    VkRenderingAttachmentInfo AttachmentInfo(VkImageView view, VkClearValue *clear, VkImageLayout layout);
+
+    VkRenderingInfo RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo* colorAttachment, VkRenderingAttachmentInfo* depthAttachment);
 }

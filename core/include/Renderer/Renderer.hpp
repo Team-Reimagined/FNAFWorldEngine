@@ -22,6 +22,6 @@ namespace FWE::Renderer
         const int width = 800;
         const int height = 480;
 
-        Vulkan vulkan;
+        Vulkan::Vulkan vulkan;
     };
 };
