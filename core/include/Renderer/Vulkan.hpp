@@ -6,6 +6,16 @@
 
 namespace FWE::Renderer::Vulkan
 {
+    struct GPUSceneData
+    {
+        glm::mat4 view;
+        glm::mat4 proj;
+        glm::mat4 viewproj;
+        glm::vec4 ambientColor;
+        glm::vec4 sunlightDirection;
+        glm::vec4 sunlightColor;
+    };
+
     struct AllocatedImage
     {
         VkImage image;
@@ -62,6 +72,7 @@ namespace FWE::Renderer::Vulkan
         VkFence renderFence;
 
         DeletionQueue deletionQueue;
+        DescriptorAllocatorGrowable frameDescriptors;
     };
 
     constexpr unsigned int FRAME_OVERLAP = 2;
@@ -77,6 +88,10 @@ namespace FWE::Renderer::Vulkan
         FrameData &GetCurrentFrame();
 
         void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)> &&function);
+
+        AllocatedImage CreateImage(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+        AllocatedImage CreateImage(void *data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+        void DestroyImage(const AllocatedImage &img);
     public:
         bool initalized = false;
         int frame = 0;
@@ -121,6 +136,8 @@ namespace FWE::Renderer::Vulkan
         void InitPipelines();
         void InitBackgroundPipelines();
         void InitTrianglePipeline();
+        void InitMeshPipeline();
+        void InitDefaultData();
 
         void CreateSwapchain(uint32_t width, uint32_t height);
         void DestroySwapchain();
@@ -130,6 +147,14 @@ namespace FWE::Renderer::Vulkan
         
         void InitImgui();
         void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
+
+        AllocatedBuffer CreateBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+        void DestroyBuffer(const AllocatedBuffer &buffer);
+
+        GPUMeshBuffers UploadMesh(std::span<uint32_t> indices, std::span<Vertex> vertices);
+        
+        void ResizeSwapchain();
+
     private:
         const char *windowName = "FNaF World Engine";
         DeletionQueue mainDeletionQueue;
@@ -138,7 +163,33 @@ namespace FWE::Renderer::Vulkan
         VkExtent2D drawExtent;
         std::vector<ComputeEffect> backgroundEffects;
         int currentBackgroundEffect {0};
+
         VkPipelineLayout trianglePipelineLayout;
         VkPipeline trianglePipeline;
+
+        VkPipelineLayout meshPipelineLayout;
+        VkPipeline meshPipeline;
+
+        GPUMeshBuffers rectangle;
+
+        bool resizeRequested = false;
+
+        double aspectRatio;
+
+        bool resizable = false;
+
+        GPUSceneData sceneData;
+
+        VkDescriptorSetLayout gpuSceneDataDescriptorLayout;
+
+        AllocatedImage whiteImage;
+        AllocatedImage blackImage;
+        AllocatedImage greyImage;
+        AllocatedImage errorCheckerboardImage;
+
+        VkSampler defaultSamplerLinear;
+        VkSampler defaultSamplerNearest;
+
+        VkDescriptorSetLayout singleImageDescriptorLayout;
     };
 }

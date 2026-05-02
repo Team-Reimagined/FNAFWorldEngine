@@ -25,6 +25,8 @@ namespace FWE::Renderer::Vulkan::Utils
         void SetColorAttachmentFormat(VkFormat format);
         void SetDepthFormat(VkFormat format);
         void DisableDepthTest();
+        void EnableBlendingAdditive();
+        void EnableBlendingAlpha();
     public:
         std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
