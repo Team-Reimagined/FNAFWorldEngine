@@ -9,7 +9,7 @@ namespace FWE::Renderer
     class Renderer
     {
     public:
-        void Init();
+        void Init(bool fixedResolution, bool fullscreen);
         void Shutdown();
         void Draw(const Image &image, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1);
         void Render();

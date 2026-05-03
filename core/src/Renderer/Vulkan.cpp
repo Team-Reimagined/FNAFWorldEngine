@@ -38,10 +38,11 @@ namespace FWE::Renderer::Vulkan
         return frames[frame % FRAME_OVERLAP];
     }
 
-    void Vulkan::Init()
+    void Vulkan::Init(bool fixedResolution, bool fullscreen)
     {
         SDL_Init(SDL_INIT_VIDEO);
-        window = SDL_CreateWindow(windowName, windowExtent.width, windowExtent.height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+        window = SDL_CreateWindow(windowName, windowExtent.width, windowExtent.height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN * fullscreen);
+        this->fixedResolution = fixedResolution;
 
         InitVulkan();
         InitSwapchain();
@@ -103,10 +104,10 @@ namespace FWE::Renderer::Vulkan
 
     void Vulkan::InitSwapchain()
     {
-        aspectRatio = (double)windowExtent.width / (double)windowExtent.height;
-        
         CreateSwapchain(windowExtent.width, windowExtent.height);
 
+        aspectRatio = (double)windowExtent.width / (double)windowExtent.height;
+        
         VkExtent3D drawImageExtent = {windowExtent.width, windowExtent.height, 1};
 
         drawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
@@ -344,11 +345,18 @@ namespace FWE::Renderer::Vulkan
         sample.minFilter = VK_FILTER_LINEAR;
         vkCreateSampler(device, &sample, nullptr, &defaultSamplerLinear);
 
+        uint32_t black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
+        blackImage = CreateImage((void*)&black, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+
         mainDeletionQueue.PushFunction([&]()
         {
             vkDestroySampler(device, defaultSamplerNearest, nullptr);
             vkDestroySampler(device, defaultSamplerLinear, nullptr);
+
+            DestroyImage(blackImage);
         });
+
+        
     }
 
     void Vulkan::InitImgui()
@@ -508,7 +516,7 @@ namespace FWE::Renderer::Vulkan
         }
         drawExtent.height = drawImage.imageExtent.height;
         drawExtent.width = drawImage.imageExtent.width;
-
+        
         VK_CHECK(vkWaitForFences(device, 1, &GetCurrentFrame().renderFence, true, 1000000000));
 
         GetCurrentFrame().deletionQueue.Flush();
@@ -535,6 +543,53 @@ namespace FWE::Renderer::Vulkan
 
         Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
+        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
+
+        VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
+        vkCmdBeginRendering(cmd, &renderInfo);
+
+        VkViewport viewport = {};
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.width = drawExtent.width;
+        viewport.height = drawExtent.height;
+        viewport.minDepth = 0.f;
+        viewport.maxDepth = 1.f;
+
+        vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset.x = 0;
+        scissor.offset.y = 0;
+        scissor.extent.width = drawExtent.width;
+        scissor.extent.height = drawExtent.height;
+
+        vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
+
+        VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
+        {
+            DescriptorWriter writer;
+            writer.WriteImage(0, blackImage.imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+
+            writer.UpdateSet(device, imageSet);
+        }
+
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipelineLayout, 0, 1, &imageSet, 0, nullptr);
+
+        GPUDrawPushConstants push_constants;
+            
+        push_constants.worldMatrix = glm::mat4 {1.f};
+        push_constants.vertexBuffer = rectangle.vertexBufferAddress;
+
+        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &push_constants);
+        vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+        vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+
+        vkCmdEndRendering(cmd);
+
         frameStarted = true;
     }
 
@@ -543,6 +598,10 @@ namespace FWE::Renderer::Vulkan
         if(!frameStarted)
         {
             StartFrame();
+            if(resizeRequested)
+            {
+                return;
+            }
         }
 
         VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
@@ -588,11 +647,11 @@ namespace FWE::Renderer::Vulkan
             return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
         };
 
-        transform[0][0] = convertRange(image.width * scaleX, 0, cameraWidth, 0, 1);
-        transform[1][1] = convertRange(image.height * scaleY, 0, cameraHeight, 0, 1);
+        transform[0][0] = convertRange(image.width * scaleX, 0, drawExtent.width, 0, 1);
+        transform[1][1] = convertRange(image.height * scaleY, 0, drawExtent.height, 0, 1);
         
-        transform[3][0] = convertRange(x, 0, cameraWidth - 1, -1, 1);
-        transform[3][1] = convertRange(y, 0, cameraHeight - 1, -1, 1);
+        transform[3][0] = convertRange(x, 0, drawExtent.width - 1, -1, 1);
+        transform[3][1] = convertRange(y, 0, drawExtent.height - 1, -1, 1);
         
         push_constants.worldMatrix = transform;
         push_constants.vertexBuffer = rectangle.vertexBufferAddress;
@@ -610,6 +669,10 @@ namespace FWE::Renderer::Vulkan
         if(!frameStarted)
         {
             StartFrame();
+            if(resizeRequested)
+            {
+                return;
+            }
         }
 
         Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -657,7 +720,7 @@ namespace FWE::Renderer::Vulkan
 
         swapchainImageFormat = VK_FORMAT_B8G8R8A8_UNORM;
 
-        vkb::Swapchain vkbSwapchain = swapchainBuilder.set_desired_format(VkSurfaceFormatKHR{.format = swapchainImageFormat,.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}).set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR).set_desired_extent(width, height).add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT).build().value();
+        vkb::Swapchain vkbSwapchain = swapchainBuilder.set_desired_format(VkSurfaceFormatKHR{.format = swapchainImageFormat,.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}).set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR).set_desired_extent(width, height).add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT).build().value();
 
         swapchainExtent = vkbSwapchain.extent;
 
@@ -670,24 +733,25 @@ namespace FWE::Renderer::Vulkan
     {
         vkDeviceWaitIdle(device);
 
-        DestroySwapchain();
-
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
+
+        DestroySwapchain();
+        
         windowExtent.width = w;
         windowExtent.height = h;
 
-        if(resizable)
+        if(fixedResolution)
+        {
+            CreateSwapchain(windowExtent.width, windowExtent.height);
+        }
+        else
         {
             vkDestroyImageView(device, drawImage.imageView, nullptr);
             vmaDestroyImage(allocator, drawImage.image, drawImage.allocation);
             InitSwapchain();
         }
-        else
-        {
-            CreateSwapchain(windowExtent.width, windowExtent.height);
-        }
-
+        
         resizeRequested = false;
     }
 

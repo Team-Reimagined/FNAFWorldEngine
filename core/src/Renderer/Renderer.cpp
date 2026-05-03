@@ -3,9 +3,9 @@
 
 namespace FWE::Renderer
 {
-    void Renderer::Init()
+    void Renderer::Init(bool fixedResolution, bool fullscreen)
     {
-        vulkan.Init();
+        vulkan.Init(fixedResolution, fullscreen);
     }
 
     void Renderer::Shutdown()

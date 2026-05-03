@@ -5,7 +5,11 @@
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
-    renderer->Init();
+
+    const bool fixedResolution = false;
+    const bool fullscreen = false;
+
+    renderer->Init(fixedResolution, fullscreen);
   
     FWE::Audio::AudioManager* am = FWE::Audio::AudioManager::GetInstance();
 
@@ -28,7 +32,6 @@ int main() {
             case SDL_EVENT_QUIT:
                 running = false;
                 break;
-            
             default:
                 break;
             }
