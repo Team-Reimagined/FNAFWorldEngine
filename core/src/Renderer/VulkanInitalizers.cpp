@@ -171,4 +171,33 @@ namespace FWE::Renderer::Vulkan::Utils
 
         return renderInfo;
     }
+
+    VkPipelineShaderStageCreateInfo PipelineShaderStageCreateInfo(VkShaderStageFlagBits stage, VkShaderModule shaderModule, const char *entry)
+    {
+        VkPipelineShaderStageCreateInfo info {};
+        info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        info.pNext = nullptr;
+
+        info.stage = stage;
+
+        info.module = shaderModule;
+
+        info.pName = entry;
+        return info;
+    }
+
+    VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo()
+    {
+        VkPipelineLayoutCreateInfo info {};
+        info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        info.pNext = nullptr;
+
+        info.flags = 0;
+        info.setLayoutCount = 0;
+        info.pSetLayouts = nullptr;
+        info.pushConstantRangeCount = 0;
+        info.pPushConstantRanges = nullptr;
+        return info;
+    }
+
 }
