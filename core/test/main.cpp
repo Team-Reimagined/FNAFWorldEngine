@@ -15,6 +15,8 @@ int main() {
     track->SetVolume(1.75f);
     track->Play();
   
+    FWE::Renderer::Image img("freddy.png", 399, 239);
+
     bool running = true;
     while (running)
     {
@@ -32,6 +34,7 @@ int main() {
             }
             ImGui_ImplSDL3_ProcessEvent(&events);
         }
+        renderer->Draw(img);
         renderer->Render();
     }
     renderer->Shutdown();

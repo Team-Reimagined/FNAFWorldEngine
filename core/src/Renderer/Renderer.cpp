@@ -13,9 +13,13 @@ namespace FWE::Renderer
         vulkan.Shutdown();
     }
 
-    void Renderer::Draw(Image image, int x, int y, float scaleX, float scaleY)
+    void Renderer::Draw(const Image &image, int x, int y, float scaleX, float scaleY)
     {
-        SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
+        if(image.data != nullptr)
+        {
+            vulkan.Draw(image);
+        }
+        //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
     }
 
     void Renderer::Render()
@@ -31,8 +35,8 @@ namespace FWE::Renderer
         return &instance;
     }
 
-    SDL_Renderer *Renderer::GetRenderer()
+    int Renderer::GetImageId(const Image &image)
     {
-        return renderer;
+        return vulkan.AddImage(image);
     }
 };

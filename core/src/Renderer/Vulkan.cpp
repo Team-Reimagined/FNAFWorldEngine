@@ -107,8 +107,6 @@ namespace FWE::Renderer::Vulkan
         
         CreateSwapchain(windowExtent.width, windowExtent.height);
 
-        //drawExtent = swapchainExtent;
-
         VkExtent3D drawImageExtent = {windowExtent.width, windowExtent.height, 1};
 
         drawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
@@ -131,12 +129,6 @@ namespace FWE::Renderer::Vulkan
         VkImageViewCreateInfo viewInfo = Utils::ImageViewCreateInfo(drawImage.imageFormat, drawImage.image, VK_IMAGE_ASPECT_COLOR_BIT);
 
         VK_CHECK(vkCreateImageView(device, &viewInfo, nullptr, &drawImage.imageView));
-
-        // mainDeletionQueue.PushFunction([=, this]()
-        // {
-        //     vkDestroyImageView(device, drawImage.imageView, nullptr);
-        //     vmaDestroyImage(allocator, drawImage.image, drawImage.allocation);
-        // });
     }
 
     void Vulkan::InitCommands()
@@ -202,12 +194,6 @@ namespace FWE::Renderer::Vulkan
 
         {
             DescriptorLayoutBuilder builder;
-            builder.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-            gpuSceneDataDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-        }
-
-        {
-            DescriptorLayoutBuilder builder;
             builder.AddBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
             singleImageDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
         }
@@ -224,6 +210,7 @@ namespace FWE::Renderer::Vulkan
             globalDescriptorAllocator.DestroyPool(device);
 
             vkDestroyDescriptorSetLayout(device, drawImageDescriptorLayout, nullptr);
+            vkDestroyDescriptorSetLayout(device, singleImageDescriptorLayout, nullptr);
         });
 
         for(int i = 0; i < FRAME_OVERLAP; i++)
@@ -248,131 +235,7 @@ namespace FWE::Renderer::Vulkan
 
     void Vulkan::InitPipelines()
     {
-        InitBackgroundPipelines();
-        InitTrianglePipeline();
         InitMeshPipeline();
-    }
-
-    void Vulkan::InitBackgroundPipelines()
-    {
-        VkPipelineLayoutCreateInfo computeLayout {};
-        computeLayout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        computeLayout.pNext = nullptr;
-        computeLayout.pSetLayouts = &drawImageDescriptorLayout;
-        computeLayout.setLayoutCount = 1;
-
-        VkPushConstantRange pushConstant{};
-        pushConstant.offset = 0;
-        pushConstant.size = sizeof(ComputePushConstants) ;
-        pushConstant.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-
-        computeLayout.pPushConstantRanges = &pushConstant;
-        computeLayout.pushConstantRangeCount = 1;
-
-        VK_CHECK(vkCreatePipelineLayout(device, &computeLayout, nullptr, &gradientPipelineLayout));
-
-        VkShaderModule gradientShader;
-        if(!Utils::LoadShaderModule("../shaders/gradient_color.comp.spv", device, &gradientShader))
-        {
-            Util::Logging::error("Error building compute shader");
-        }
-
-        VkShaderModule skyShader;
-        if(!Utils::LoadShaderModule("../shaders/sky.comp.spv", device, &skyShader))
-        {
-            Util::Logging::error("Error building compute shader");
-        }
-
-        VkPipelineShaderStageCreateInfo stageInfo {};
-        stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        stageInfo.pNext = nullptr;
-        stageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-        stageInfo.module = gradientShader;
-        stageInfo.pName = "main";
-
-        VkComputePipelineCreateInfo computePipelineCreateInfo {};
-        computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-        computePipelineCreateInfo.pNext = nullptr;
-        computePipelineCreateInfo.layout = gradientPipelineLayout;
-        computePipelineCreateInfo.stage = stageInfo;
-
-        ComputeEffect gradient;
-        gradient.layout = gradientPipelineLayout;
-        gradient.name = "gradient";
-        gradient.data = {};
-
-        gradient.data.data1 = glm::vec4(1, 0, 0, 1);
-        gradient.data.data2 = glm::vec4(0, 0, 1, 1);
-
-        VK_CHECK(vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &gradient.pipeline));
-
-        computePipelineCreateInfo.stage.module = skyShader;
-
-        ComputeEffect sky;
-        sky.layout  = gradientPipelineLayout;
-        sky.name = "sky";
-        sky.data = {};
-
-        sky.data.data1 = glm::vec4(0.1, 0.2, 0.3, 0.97);
-
-        VK_CHECK(vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &sky.pipeline));
-
-        backgroundEffects.push_back(gradient);
-        backgroundEffects.push_back(sky);
-
-        vkDestroyShaderModule(device, gradientShader, nullptr);
-        vkDestroyShaderModule(device, skyShader, nullptr);
-
-        mainDeletionQueue.PushFunction([&]()
-        {
-            vkDestroyPipelineLayout(device, gradientPipelineLayout, nullptr);
-            vkDestroyPipeline(device, gradient.pipeline, nullptr);
-            vkDestroyPipeline(device, sky.pipeline, nullptr);
-        });
-    }
-
-    void Vulkan::InitTrianglePipeline()
-    {
-        VkShaderModule triangleFragShader;
-        if(!Utils::LoadShaderModule("../shaders/colored_triangle.frag.spv", device, &triangleFragShader))
-        {
-            Util::Logging::error("Error building fragment shader");
-        }
-        
-        VkShaderModule triangleVertShader;
-        if(!Utils::LoadShaderModule("../shaders/colored_triangle.vert.spv", device, &triangleVertShader))
-        {
-            Util::Logging::error("Error building vertex shader");
-        }
-
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo = Utils::PipelineLayoutCreateInfo();
-        VK_CHECK(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &trianglePipelineLayout));
-
-        Utils::PipelineBuilder pipelineBuilder;
-
-        pipelineBuilder.pipelineLayout = trianglePipelineLayout;
-
-        pipelineBuilder.SetShaders(triangleVertShader, triangleFragShader);
-        pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-        pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
-        pipelineBuilder.SetCullMode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
-        pipelineBuilder.SetMultisamplingNone();
-        pipelineBuilder.DisableBlending();
-        pipelineBuilder.DisableDepthTest();
-
-        pipelineBuilder.SetColorAttachmentFormat(drawImage.imageFormat);
-        pipelineBuilder.SetDepthFormat(VK_FORMAT_UNDEFINED);
-
-        trianglePipeline = pipelineBuilder.BuildPipeline(device);
-
-        vkDestroyShaderModule(device, triangleFragShader, nullptr);
-        vkDestroyShaderModule(device, triangleVertShader, nullptr);
-
-        mainDeletionQueue.PushFunction([&]()
-        {
-            vkDestroyPipelineLayout(device, trianglePipelineLayout, nullptr);
-            vkDestroyPipeline(device, trianglePipeline, nullptr);
-        });
     }
 
     void Vulkan::InitMeshPipeline()
@@ -435,16 +298,16 @@ namespace FWE::Renderer::Vulkan
     {
         std::array<Vertex, 4> rectVertices;
 
-        rectVertices[0].position = {0.5, -0.5, 0};
+        rectVertices[0].position = {1, -1, 0};
         rectVertices[0].uvX = 1.0f;
         rectVertices[0].uvY = 0.0f;
-        rectVertices[1].position = {0.5, 0.5, 0};
+        rectVertices[1].position = {1, 1, 0};
         rectVertices[1].uvX = 1.0f;
         rectVertices[1].uvY = 1.0f;
-        rectVertices[2].position = {-0.5, -0.5, 0};
+        rectVertices[2].position = {-1, -1, 0};
         rectVertices[2].uvX = 0.0f;
         rectVertices[2].uvY = 0.0f;
-        rectVertices[3].position = {-0.5, 0.5, 0};
+        rectVertices[3].position = {-1, 1, 0};
         rectVertices[3].uvX = 0.0f;
         rectVertices[3].uvY = 1.0f;
 
@@ -470,26 +333,6 @@ namespace FWE::Renderer::Vulkan
             DestroyBuffer(rectangle.vertexBuffer);            
         });
 
-        uint32_t white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
-        whiteImage = CreateImage((void*)&white, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
-
-        uint32_t grey = glm::packUnorm4x8(glm::vec4(0.66f, 0.66f, 0.66f, 1));
-        greyImage = CreateImage((void*)&grey, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
-
-        uint32_t black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
-        blackImage = CreateImage((void*)&black, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
-
-        uint32_t magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
-        std::array<uint32_t, 16 * 16 > pixels;
-        for (int x = 0; x < 16; x++)
-        {
-            for (int y = 0; y < 16; y++)
-            {
-                pixels[y*16 + x] = ((x % 2) ^ (y % 2)) ? magenta : black;
-            }
-        }
-        errorCheckerboardImage = CreateImage(pixels.data(), VkExtent3D{16, 16, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
-
         VkSamplerCreateInfo sample = {.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
 
         sample.magFilter = VK_FILTER_NEAREST;
@@ -505,11 +348,6 @@ namespace FWE::Renderer::Vulkan
         {
             vkDestroySampler(device, defaultSamplerNearest, nullptr);
             vkDestroySampler(device, defaultSamplerLinear, nullptr);
-
-            DestroyImage(whiteImage);
-            DestroyImage(greyImage);
-            DestroyImage(blackImage);
-            DestroyImage(errorCheckerboardImage);
         });
     }
 
@@ -659,7 +497,7 @@ namespace FWE::Renderer::Vulkan
         return newSurface;
     }
 
-    void Vulkan::Render()
+    void Vulkan::StartFrame()
     {
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
@@ -671,28 +509,6 @@ namespace FWE::Renderer::Vulkan
         drawExtent.height = drawImage.imageExtent.height;
         drawExtent.width = drawImage.imageExtent.width;
 
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        if(ImGui::Begin("Background"))
-        {
-            ComputeEffect &selected = backgroundEffects[currentBackgroundEffect];
-
-            ImGui::Text("Selected Effect: ", selected.name);
-
-            ImGui::SliderInt("Effect Index", &currentBackgroundEffect, 0, backgroundEffects.size() - 1);
-
-            ImGui::InputFloat4("data1", (float*)&selected.data.data1);
-            ImGui::InputFloat4("data2", (float*)&selected.data.data2);
-            ImGui::InputFloat4("data3", (float*)&selected.data.data3);
-            ImGui::InputFloat4("data4", (float*)&selected.data.data4);
-        }
-
-        ImGui::End();
-
-        ImGui::Render();
-
         VK_CHECK(vkWaitForFences(device, 1, &GetCurrentFrame().renderFence, true, 1000000000));
 
         GetCurrentFrame().deletionQueue.Flush();
@@ -702,8 +518,6 @@ namespace FWE::Renderer::Vulkan
         GetCurrentFrame().deletionQueue.Flush();
         GetCurrentFrame().frameDescriptors.ClearPools(device);
 
-        uint32_t swapchainImageIndex;
-
         VkResult result = vkAcquireNextImageKHR(device, swapchain, 1000000000, GetCurrentFrame().swapchainSemaphore, nullptr, &swapchainImageIndex);
         if(result == VK_ERROR_OUT_OF_DATE_KHR)
         {
@@ -711,7 +525,7 @@ namespace FWE::Renderer::Vulkan
             return;
         }
 
-        VkCommandBuffer cmd = GetCurrentFrame().mainCommandBuffer;
+        cmd = GetCurrentFrame().mainCommandBuffer;
 
         VK_CHECK(vkResetCommandBuffer(cmd, 0));
 
@@ -719,24 +533,91 @@ namespace FWE::Renderer::Vulkan
 
         VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
-        Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+        Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-        DrawBackground(cmd);
+        frameStarted = true;
+    }
 
-        Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    void Vulkan::Draw(const Image &image)
+    {
+        if(!frameStarted)
+        {
+            StartFrame();
+        }
 
-        DrawGeometry(cmd);
+        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
+
+        VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
+        vkCmdBeginRendering(cmd, &renderInfo);
+
+        VkViewport viewport = {};
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.width = drawExtent.width;
+        viewport.height = drawExtent.height;
+        viewport.minDepth = 0.f;
+        viewport.maxDepth = 1.f;
+
+        vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset.x = 0;
+        scissor.offset.y = 0;
+        scissor.extent.width = drawExtent.width;
+        scissor.extent.height = drawExtent.height;
+
+        vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
+
+        VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
+        {
+            DescriptorWriter writer;
+            writer.WriteImage(0, images[image.id].imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+
+            writer.UpdateSet(device, imageSet);
+        }
+
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipelineLayout, 0, 1, &imageSet, 0, nullptr);
+
+        GPUDrawPushConstants push_constants;
+        glm::mat4 transform = glm::mat4 {1.f};
+
+        auto convertRange = [](float value, float min1, float max1, float min2, float max2)
+        {
+            return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
+        };
+
+        transform[0][0] = convertRange(image.width * image.scaleX, 0, cameraWidth, 0, 1);
+        transform[1][1] = convertRange(image.height * image.scaleY, 0, cameraHeight, 0, 1);
+        
+        transform[3][0] = convertRange(image.x, 0, cameraWidth - 1, -1, 1);
+        transform[3][1] = convertRange(image.y, 0, cameraHeight - 1, -1, 1);
+        
+        push_constants.worldMatrix = transform;
+        push_constants.vertexBuffer = rectangle.vertexBufferAddress;
+
+        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &push_constants);
+        vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+        vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+
+        vkCmdEndRendering(cmd);
+    }
+
+    void Vulkan::Render()
+    {
+        if(!frameStarted)
+        {
+            StartFrame();
+        }
 
         Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
         Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         Utils::CopyImageToImage(cmd, drawImage.image, swapchainImages[swapchainImageIndex], drawExtent, swapchainExtent);
 
-        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-        DrawImgui(cmd, swapchainImageViews[swapchainImageIndex]);
-
-        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
         VK_CHECK(vkEndCommandBuffer(cmd));
 
@@ -767,6 +648,7 @@ namespace FWE::Renderer::Vulkan
         }
 
         frame++;
+        frameStarted = false;
     }
 
     void Vulkan::CreateSwapchain(uint32_t width, uint32_t height)
@@ -809,110 +691,6 @@ namespace FWE::Renderer::Vulkan
         resizeRequested = false;
     }
 
-    void Vulkan::DrawBackground(VkCommandBuffer cmd)
-    {
-        // VkClearColorValue clearValue;
-        // float flash = std::abs(std::sin(frame / 120.f));
-        // clearValue = {{0, 0, flash, 1}};
-
-        // VkImageSubresourceRange clearRange = Utils::ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-
-        // vkCmdClearColorImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
-
-        ComputeEffect effect = backgroundEffects[currentBackgroundEffect];
-
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
-
-        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, gradientPipelineLayout, 0, 1, &drawImageDescriptors, 0, nullptr);
-
-        vkCmdPushConstants(cmd, gradientPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputePushConstants), &effect.data);
-        
-        vkCmdDispatch(cmd, std::ceil(drawExtent.width / 16.0), std::ceil(drawExtent.height / 16.0), 1);
-    }
-
-    void Vulkan::DrawGeometry(VkCommandBuffer cmd)
-    {
-        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
-
-        VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
-        vkCmdBeginRendering(cmd, &renderInfo);
-
-        // vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, trianglePipeline);
-
-        VkViewport viewport = {};
-        viewport.x = 0;
-        viewport.y = 0;
-        viewport.width = drawExtent.width;
-        viewport.height = drawExtent.height;
-        viewport.minDepth = 0.f;
-        viewport.maxDepth = 1.f;
-
-        vkCmdSetViewport(cmd, 0, 1, &viewport);
-
-        VkRect2D scissor = {};
-        scissor.offset.x = 0;
-        scissor.offset.y = 0;
-        scissor.extent.width = drawExtent.width;
-        scissor.extent.height = drawExtent.height;
-
-        vkCmdSetScissor(cmd, 0, 1, &scissor);
-
-        // vkCmdDraw(cmd, 3, 1, 0, 0);
-
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
-
-        // GPUDrawPushConstants pushConstants;
-        // pushConstants.worldMatrix = glm::mat4 {1.f};
-        // pushConstants.vertexBuffer = rectangle.vertexBufferAddress;
-
-        // vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
-        // vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-
-        // vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
-
-        VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
-        {
-            DescriptorWriter writer;
-            writer.WriteImage(0, errorCheckerboardImage.imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-
-            writer.UpdateSet(device, imageSet);
-        }
-
-        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipelineLayout, 0, 1, &imageSet, 0, nullptr);
-
-        glm::mat4 view = glm::translate(glm::vec3{ 0,0,-5 });
-        glm::mat4 projection = glm::perspective(glm::radians(70.f), (float)drawExtent.width / (float)drawExtent.height, 10000.f, 0.1f);
-
-        projection[1][1] *= -1;
-
-        GPUDrawPushConstants push_constants;
-        push_constants.worldMatrix = glm::mat4 {1.f};
-        push_constants.vertexBuffer = rectangle.vertexBufferAddress;
-
-        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &push_constants);
-        vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-
-        vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
-
-        AllocatedBuffer gpuSceneDataBuffer = CreateBuffer(sizeof(GPUSceneData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-
-        GetCurrentFrame().deletionQueue.PushFunction([=, this]()
-        {
-            DestroyBuffer(gpuSceneDataBuffer);  
-        });
-
-        GPUSceneData *sceneUniformData = (GPUSceneData*)gpuSceneDataBuffer.allocation->GetMappedData();
-        *sceneUniformData = sceneData;
-
-        VkDescriptorSet globalDescriptor = GetCurrentFrame().frameDescriptors.Allocate(device, gpuSceneDataDescriptorLayout);
-
-        DescriptorWriter writer;
-        writer.WriteBuffer(0, gpuSceneDataBuffer.buffer, sizeof(GPUSceneData), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-        writer.UpdateSet(device, globalDescriptor);
-
-        vkCmdEndRendering(cmd);
-    }
-
     void Vulkan::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
     {
         VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(targetImageView, nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -951,6 +729,12 @@ namespace FWE::Renderer::Vulkan
 
                 frames[i].deletionQueue.Flush();
             }
+
+            for(AllocatedImage &image : images)
+            {
+                DestroyImage(image);
+            }
+            images.clear();
 
             vkDestroyImageView(device, drawImage.imageView, nullptr);
             vmaDestroyImage(allocator, drawImage.image, drawImage.allocation);
@@ -1038,5 +822,11 @@ namespace FWE::Renderer::Vulkan
     {
         vkDestroyImageView(device, img.imageView, nullptr);
         vmaDestroyImage(allocator, img.image, img.allocation);
+    }
+
+    int Vulkan::AddImage(const Image &image)
+    {
+        images.push_back(CreateImage(image.data, (VkExtent3D){image.width, image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT));
+        return images.size() - 1;
     }
 }

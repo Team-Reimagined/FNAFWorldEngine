@@ -3,19 +3,10 @@
 #include "VulkanTypes.hpp"
 #include <SDL3/SDL.h>
 #include "VulkanDescriptors.hpp"
+#include "Image.hpp"
 
 namespace FWE::Renderer::Vulkan
 {
-    struct GPUSceneData
-    {
-        glm::mat4 view;
-        glm::mat4 proj;
-        glm::mat4 viewproj;
-        glm::vec4 ambientColor;
-        glm::vec4 sunlightDirection;
-        glm::vec4 sunlightColor;
-    };
-
     struct AllocatedImage
     {
         VkImage image;
@@ -45,24 +36,6 @@ namespace FWE::Renderer::Vulkan
         }
     };
 
-    struct ComputePushConstants
-    {
-        glm::vec4 data1;
-        glm::vec4 data2;
-        glm::vec4 data3;
-        glm::vec4 data4;
-    };
-
-    struct ComputeEffect
-    {
-        const char *name;
-
-        VkPipeline pipeline;
-        VkPipelineLayout layout;
-
-        ComputePushConstants data;
-    };
-
     struct FrameData
     {
         VkCommandPool commandPool;
@@ -73,7 +46,7 @@ namespace FWE::Renderer::Vulkan
 
         DeletionQueue deletionQueue;
         DescriptorAllocatorGrowable frameDescriptors;
-    };
+    }; 
 
     constexpr unsigned int FRAME_OVERLAP = 2;
     
@@ -83,20 +56,54 @@ namespace FWE::Renderer::Vulkan
         void Init();
         void Shutdown();
         void Render();
-        void Run();
+        void Draw(const Image &image);
+        int AddImage(const Image &image);
         static Vulkan *GetInstance();
+        
+    private:
+        void InitVulkan();
+        void InitSwapchain();
+        void InitCommands();
+        void InitSyncStructures();
+        void InitDescriptors();
+        void InitPipelines();
+        void InitMeshPipeline();
+        void InitDefaultData();
+
         FrameData &GetCurrentFrame();
+
+        void CreateSwapchain(uint32_t width, uint32_t height);
+        void DestroySwapchain();
+        
+        void InitImgui();
+        void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
+
+        AllocatedBuffer CreateBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+        void DestroyBuffer(const AllocatedBuffer &buffer);
+
+        GPUMeshBuffers UploadMesh(std::span<uint32_t> indices, std::span<Vertex> vertices);
+        
+        void ResizeSwapchain();
+
+        void StartFrame();
 
         void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)> &&function);
 
         AllocatedImage CreateImage(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
         AllocatedImage CreateImage(void *data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
         void DestroyImage(const AllocatedImage &img);
-    public:
+
+    private:
         bool initalized = false;
+        
         int frame = 0;
-        bool stopRendering = false;
-        VkExtent2D windowExtent = {800, 480};
+
+        const char *windowName = "FNaF World Engine";
+
+        const uint32_t cameraWidth = 800;
+        const uint32_t cameraHeight = 480;
+
+        VkExtent2D windowExtent = {cameraWidth, cameraHeight};
         SDL_Window *window = nullptr;
 
         VkInstance instance;
@@ -122,55 +129,30 @@ namespace FWE::Renderer::Vulkan
         VkDescriptorSet drawImageDescriptors;
         VkDescriptorSetLayout drawImageDescriptorLayout;
 
-        VkPipelineLayout gradientPipelineLayout;
-
         VkFence immFence;
         VkCommandBuffer immCommandBuffer;
         VkCommandPool immCommandPool;
-    private:
-        void InitVulkan();
-        void InitSwapchain();
-        void InitCommands();
-        void InitSyncStructures();
-        void InitDescriptors();
-        void InitPipelines();
-        void InitBackgroundPipelines();
-        void InitTrianglePipeline();
-        void InitMeshPipeline();
-        void InitDefaultData();
-
-        void CreateSwapchain(uint32_t width, uint32_t height);
-        void DestroySwapchain();
-
-        void DrawBackground(VkCommandBuffer cmd);
-        void DrawGeometry(VkCommandBuffer cmd);
         
-        void InitImgui();
-        void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
-
-        AllocatedBuffer CreateBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
-        void DestroyBuffer(const AllocatedBuffer &buffer);
-
-        GPUMeshBuffers UploadMesh(std::span<uint32_t> indices, std::span<Vertex> vertices);
-        
-        void ResizeSwapchain();
-
-    private:
-        const char *windowName = "FNaF World Engine";
         DeletionQueue mainDeletionQueue;
         VmaAllocator allocator;
         AllocatedImage drawImage;
         VkExtent2D drawExtent;
-        std::vector<ComputeEffect> backgroundEffects;
-        int currentBackgroundEffect {0};
-
-        VkPipelineLayout trianglePipelineLayout;
-        VkPipeline trianglePipeline;
 
         VkPipelineLayout meshPipelineLayout;
         VkPipeline meshPipeline;
 
         GPUMeshBuffers rectangle;
+
+        std::vector<AllocatedImage> images;
+
+        VkSampler defaultSamplerLinear;
+        VkSampler defaultSamplerNearest;
+
+        VkDescriptorSetLayout singleImageDescriptorLayout;
+
+        VkCommandBuffer cmd;
+
+        uint32_t swapchainImageIndex;
 
         bool resizeRequested = false;
 
@@ -178,18 +160,6 @@ namespace FWE::Renderer::Vulkan
 
         bool resizable = false;
 
-        GPUSceneData sceneData;
-
-        VkDescriptorSetLayout gpuSceneDataDescriptorLayout;
-
-        AllocatedImage whiteImage;
-        AllocatedImage blackImage;
-        AllocatedImage greyImage;
-        AllocatedImage errorCheckerboardImage;
-
-        VkSampler defaultSamplerLinear;
-        VkSampler defaultSamplerNearest;
-
-        VkDescriptorSetLayout singleImageDescriptorLayout;
+        bool frameStarted = false;
     };
 }
