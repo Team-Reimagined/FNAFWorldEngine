@@ -8,7 +8,7 @@
 
 namespace FWE::Renderer
 {
-    Image::Image(const char *filePath, int x, int y, float scaleX, float scaleY)
+    Image::Image(const char *filePath)
     {
         data = stbi_load(filePath, (int *)&width, (int *)&height, &n, 4);
 
@@ -18,10 +18,6 @@ namespace FWE::Renderer
             return;
         }
         
-        this->x = x;
-        this->y = y;
-        this->scaleX = scaleX;
-        this->scaleY = scaleY;
         id = Renderer::GetInstance()->GetImageId(*this);
     }
 
