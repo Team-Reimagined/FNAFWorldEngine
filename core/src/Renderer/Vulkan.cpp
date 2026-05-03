@@ -538,7 +538,7 @@ namespace FWE::Renderer::Vulkan
         frameStarted = true;
     }
 
-    void Vulkan::Draw(const Image &image)
+    void Vulkan::Draw(const Image &image, int x, int y, float scaleX, float scaleY)
     {
         if(!frameStarted)
         {
@@ -588,11 +588,11 @@ namespace FWE::Renderer::Vulkan
             return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
         };
 
-        transform[0][0] = convertRange(image.width * image.scaleX, 0, cameraWidth, 0, 1);
-        transform[1][1] = convertRange(image.height * image.scaleY, 0, cameraHeight, 0, 1);
+        transform[0][0] = convertRange(image.width * scaleX, 0, cameraWidth, 0, 1);
+        transform[1][1] = convertRange(image.height * scaleY, 0, cameraHeight, 0, 1);
         
-        transform[3][0] = convertRange(image.x, 0, cameraWidth - 1, -1, 1);
-        transform[3][1] = convertRange(image.y, 0, cameraHeight - 1, -1, 1);
+        transform[3][0] = convertRange(x, 0, cameraWidth - 1, -1, 1);
+        transform[3][1] = convertRange(y, 0, cameraHeight - 1, -1, 1);
         
         push_constants.worldMatrix = transform;
         push_constants.vertexBuffer = rectangle.vertexBufferAddress;

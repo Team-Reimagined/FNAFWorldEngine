@@ -56,7 +56,7 @@ namespace FWE::Renderer::Vulkan
         void Init();
         void Shutdown();
         void Render();
-        void Draw(const Image &image);
+        void Draw(const Image &image, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1);
         int AddImage(const Image &image);
         static Vulkan *GetInstance();
         

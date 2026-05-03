@@ -17,7 +17,7 @@ namespace FWE::Renderer
     {
         if(image.data != nullptr)
         {
-            vulkan.Draw(image);
+            vulkan.Draw(image, x, y, scaleX, scaleY);
         }
         //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
     }
