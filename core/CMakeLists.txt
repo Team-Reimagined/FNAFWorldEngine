@@ -24,13 +24,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL3)
 
 FetchContent_Declare(
-    SDL3_image
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image
-    GIT_TAG release-3.4.2
-)
-FetchContent_MakeAvailable(SDL3_image)
-
-FetchContent_Declare(
     SDL3_mixer
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer
     GIT_TAG release-3.2.0
@@ -84,7 +77,6 @@ target_link_libraries(imgui PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3
-    SDL3_image::SDL3_image
     SDL3_mixer::SDL3_mixer
     glm::glm
     vk-bootstrap::vk-bootstrap
