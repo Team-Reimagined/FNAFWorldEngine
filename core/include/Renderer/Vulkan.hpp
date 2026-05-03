@@ -53,7 +53,7 @@ namespace FWE::Renderer::Vulkan
     class Vulkan
     {
     public:
-        void Init();
+        void Init(bool fixedResolution, bool fullscreen);
         void Shutdown();
         void Render();
         void Draw(const Image &image, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1);
@@ -143,6 +143,7 @@ namespace FWE::Renderer::Vulkan
 
         GPUMeshBuffers rectangle;
 
+        AllocatedImage blackImage;
         std::vector<AllocatedImage> images;
 
         VkSampler defaultSamplerLinear;
@@ -158,7 +159,7 @@ namespace FWE::Renderer::Vulkan
 
         double aspectRatio;
 
-        bool resizable = false;
+        bool fixedResolution = true;
 
         bool frameStarted = false;
     };
