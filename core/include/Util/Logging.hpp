@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <string>
 #include <sstream>
-#include <stdio.h>
+#include <iostream>
 
 namespace FWE::Util {
     class Logging {
@@ -16,7 +16,7 @@ namespace FWE::Util {
             std::string str = std::format(fmt, std::forward<Args>(args)...);
             std::string log = std::format("[{}]: {} \x1b[0m \n", getCurrentTime(), str);
             getLogFile() << std::format("[{}]: {}", getCurrentTime(), str) << std::endl;
-            printf(log.c_str());
+            std::cout << log << std::endl;
         }
 
         template <class... Args>
@@ -24,7 +24,7 @@ namespace FWE::Util {
             std::string str = std::format(fmt, std::forward<Args>(args)...);
             std::string log = std::format("\e[0;33m[{}]: {} \x1b[0m \n", getCurrentTime(), str);
             getLogFile() << std::format("[{}]: {}", getCurrentTime(), str) << std::endl;
-            printf(log.c_str());
+            std::cout << log << std::endl;
         }
 
         template <class... Args>
@@ -32,7 +32,7 @@ namespace FWE::Util {
             std::string str = std::format(fmt, std::forward<Args>(args)...);
             std::string log = std::format("\e[0;31m[{}]: {} \x1b[0m \n", getCurrentTime(), str);
             getLogFile() << std::format("[{}]: {}", getCurrentTime(), str) << std::endl;
-            printf(log.c_str());
+            std::cout << log << std::endl;
         }
 
     private:
