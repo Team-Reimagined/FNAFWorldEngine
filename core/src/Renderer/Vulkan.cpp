@@ -521,8 +521,6 @@ namespace FWE::Renderer::Vulkan
 
         GetCurrentFrame().deletionQueue.Flush();
 
-        VK_CHECK(vkResetFences(device, 1, &GetCurrentFrame().renderFence));
-
         GetCurrentFrame().deletionQueue.Flush();
         GetCurrentFrame().frameDescriptors.ClearPools(device);
 
@@ -532,6 +530,8 @@ namespace FWE::Renderer::Vulkan
             resizeRequested = true;
             return;
         }
+
+        VK_CHECK(vkResetFences(device, 1, &GetCurrentFrame().renderFence));
 
         cmd = GetCurrentFrame().mainCommandBuffer;
 
@@ -720,7 +720,7 @@ namespace FWE::Renderer::Vulkan
 
         swapchainImageFormat = VK_FORMAT_B8G8R8A8_UNORM;
 
-        vkb::Swapchain vkbSwapchain = swapchainBuilder.set_desired_format(VkSurfaceFormatKHR{.format = swapchainImageFormat,.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}).set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR).set_desired_extent(width, height).add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT).build().value();
+        vkb::Swapchain vkbSwapchain = swapchainBuilder.set_desired_format(VkSurfaceFormatKHR{.format = swapchainImageFormat,.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}).set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR).set_desired_extent(width, height).add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT).build().value();
 
         swapchainExtent = vkbSwapchain.extent;
 
