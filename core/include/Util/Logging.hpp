@@ -3,6 +3,7 @@
 #include <chrono>
 #include <format>
 #include <fstream>
+#include <filesystem>
 #include <string>
 #include <sstream>
 #include <stdio.h>
@@ -44,6 +45,10 @@ namespace FWE::Util {
             auto tm = *std::localtime(&t);
             std::ostringstream time;
             time << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+
+            if (!std::filesystem::exists("logs/")) {
+                std::filesystem::create_directory("logs/");
+            }
 
             std::string filename = std::format("logs/log-{}.txt", time.str());
             static std::ofstream logFile(filename);
