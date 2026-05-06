@@ -21,7 +21,7 @@ namespace FWE::Audio {
     MIX_Audio* AudioManager::LoadAudio(std::string filePath) {
         MIX_Audio* audio = MIX_LoadAudio(this->mixer, filePath.c_str(), true);
         if (!audio) {
-            Util::Logging::error("Couldn't load audio from %s: %s", filePath, SDL_GetError());
+            Util::Logging::error("Couldn't load audio from {}: {}", filePath, SDL_GetError());
             return nullptr;
         }
 
