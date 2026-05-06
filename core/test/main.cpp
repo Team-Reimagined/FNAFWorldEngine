@@ -1,4 +1,5 @@
 #include "Renderer/Renderer.hpp"
+#include "Audio/AudioManager.hpp"
 #include <thread>
 #include "Audio/AudioManager.hpp"
 #include "backends/imgui_impl_sdl3.h"
