@@ -1,8 +1,13 @@
 #include "Renderer/Renderer.hpp"
 #include "Audio/AudioManager.hpp"
 #include <thread>
+#include <chrono>
 #include "Audio/AudioManager.hpp"
 #include "backends/imgui_impl_sdl3.h"
+#include "Types/Atlas.hpp"
+#include "Nodes/Sprite.hpp"
+#include "Nodes/AnimatedSprite.hpp"
+#include "Util/Logging.hpp"
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
@@ -19,12 +24,46 @@ int main() {
     auto track = am->CreateTrack(audio);
     track->SetVolume(1.75f);
     track->Play();
+
+    FWE::Renderer::Image backgroundImg("Background.png");
+    FWE::Types::Atlas backgroundAtlas =
+    {
+        .img = backgroundImg,
+        .x = 0,
+        .y = 0,
+        .width = 800,
+        .height = 480
+    };
   
-    FWE::Renderer::Image img("freddy.png");
+    FWE::Renderer::Image freddyBonnieImg("FreddyBonnieAtlas.png");
+    FWE::Types::Atlas freddyBonnieAtlas = 
+    {
+        .img = freddyBonnieImg,
+        .x = 0,
+        .y = 0,
+        .width = 250,
+        .height = 250
+    };
+
+    FWE::Nodes::Sprite background;
+    background.atlas = backgroundAtlas;
+    background.position = {400, 240};
+
+    FWE::Nodes::AnimatedSprite freddy;
+    freddy.atlas = freddyBonnieAtlas;
+    freddy.frameCount = 11;
+    freddy.position = {300, 249};
+
+    FWE::Nodes::AnimatedSprite bonnie;
+    bonnie.atlas = freddyBonnieAtlas;
+    bonnie.atlas.y = 250;
+    bonnie.frameCount = 11;
+    bonnie.position = {500, 249};
 
     bool running = true;
     while (running)
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         SDL_Event events;
         while(SDL_PollEvent(&events))
         {
@@ -38,7 +77,9 @@ int main() {
             }
             ImGui_ImplSDL3_ProcessEvent(&events);
         }
-        renderer->Draw(img, 399, 239);
+        background.Draw();
+        freddy.Draw();
+        bonnie.Draw();
         renderer->Render();
     }
     renderer->Shutdown();

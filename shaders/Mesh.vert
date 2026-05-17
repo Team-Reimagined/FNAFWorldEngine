@@ -22,6 +22,8 @@ layout( push_constant ) uniform constants
 {	
 	mat4 render_matrix;
 	VertexBuffer vertexBuffer;
+	vec2 uvOffset;
+	vec2 uvScale;
 } PushConstants;
 
 void main() 
@@ -32,6 +34,6 @@ void main()
 	//output data
 	gl_Position = PushConstants.render_matrix *vec4(v.position, 1.0f);
 	outColor = v.color.xyz;
-	outUV.x = v.uv_x;
-	outUV.y = v.uv_y;
+	outUV.x = v.uv_x * PushConstants.uvScale.x + PushConstants.uvOffset.x;
+	outUV.y = v.uv_y * PushConstants.uvScale.y + PushConstants.uvOffset.y;
 }

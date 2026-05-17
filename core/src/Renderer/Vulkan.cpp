@@ -242,13 +242,13 @@ namespace FWE::Renderer::Vulkan
     void Vulkan::InitMeshPipeline()
     {
         VkShaderModule triangleFragShader;
-        if(!Utils::LoadShaderModule("../shaders/tex_image.frag.spv", device, &triangleFragShader))
+        if(!Utils::LoadShaderModule("../shaders/Texture.frag.spv", device, &triangleFragShader))
         {
             Util::Logging::error("Error building fragment shader");
         }
         
         VkShaderModule triangleVertShader;
-        if(!Utils::LoadShaderModule("../shaders/colored_triangle_mesh.vert.spv", device, &triangleVertShader))
+        if(!Utils::LoadShaderModule("../shaders/Mesh.vert.spv", device, &triangleVertShader))
         {
             Util::Logging::error("Error building vertex shader");
         }
@@ -593,15 +593,16 @@ namespace FWE::Renderer::Vulkan
         frameStarted = true;
     }
 
-    void Vulkan::Draw(const Image &image, int x, int y, float scaleX, float scaleY)
+    void Vulkan::Draw(const FWE::Types::Atlas &atlas, int x, int y, float scaleX, float scaleY)
     {
         if(!frameStarted)
         {
             StartFrame();
-            if(resizeRequested)
-            {
-                return;
-            }
+        }
+
+        if(resizeRequested)
+        {
+            return;
         }
 
         VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
@@ -632,14 +633,14 @@ namespace FWE::Renderer::Vulkan
         VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
         {
             DescriptorWriter writer;
-            writer.WriteImage(0, images[image.id].imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+            writer.WriteImage(0, images[atlas.img.id].imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 
             writer.UpdateSet(device, imageSet);
         }
 
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipelineLayout, 0, 1, &imageSet, 0, nullptr);
 
-        GPUDrawPushConstants push_constants;
+        GPUDrawPushConstants pushConstants;
         glm::mat4 transform = glm::mat4 {1.f};
 
         auto convertRange = [](float value, float min1, float max1, float min2, float max2)
@@ -647,16 +648,26 @@ namespace FWE::Renderer::Vulkan
             return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
         };
 
-        transform[0][0] = convertRange(image.width * scaleX, 0, drawExtent.width, 0, 1);
-        transform[1][1] = convertRange(image.height * scaleY, 0, drawExtent.height, 0, 1);
+        transform[0][0] = convertRange(atlas.width * scaleX, 0, drawExtent.width, 0, 1);
+        transform[1][1] = convertRange(atlas.height * scaleY, 0, drawExtent.height, 0, 1);
         
-        transform[3][0] = convertRange(x, 0, drawExtent.width - 1, -1, 1);
-        transform[3][1] = convertRange(y, 0, drawExtent.height - 1, -1, 1);
-        
-        push_constants.worldMatrix = transform;
-        push_constants.vertexBuffer = rectangle.vertexBufferAddress;
+        transform[3][0] = convertRange(x, 0, drawExtent.width, -1, 1);
+        transform[3][1] = convertRange(y, 0, drawExtent.height, -1, 1);
 
-        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &push_constants);
+        glm::vec2 uvOffset;
+        uvOffset.x = convertRange(atlas.x, 0, atlas.img.width, 0, 1);
+        uvOffset.y = convertRange(atlas.y, 0, atlas.img.height, 0, 1);
+
+        glm::vec2 uvScale;
+        uvScale.x = convertRange(atlas.width, 0, atlas.img.width, 0, 1);
+        uvScale.y = convertRange(atlas.height, 0, atlas.img.height, 0, 1);
+        
+        pushConstants.worldMatrix = transform;
+        pushConstants.vertexBuffer = rectangle.vertexBufferAddress;
+        pushConstants.uvOffset = uvOffset;
+        pushConstants.uvScale = uvScale;
+
+        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
         vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
         vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
@@ -669,10 +680,11 @@ namespace FWE::Renderer::Vulkan
         if(!frameStarted)
         {
             StartFrame();
-            if(resizeRequested)
-            {
-                return;
-            }
+        }
+
+        if(resizeRequested)
+        {
+            return;
         }
 
         Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);

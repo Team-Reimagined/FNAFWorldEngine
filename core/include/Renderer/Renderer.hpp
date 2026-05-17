@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include "Renderer/Image.hpp"
 #include "Renderer/Vulkan.hpp"
+#include "Types/Atlas.hpp"
 
 namespace FWE::Renderer
 {
@@ -11,7 +12,7 @@ namespace FWE::Renderer
     public:
         void Init(bool fixedResolution, bool fullscreen);
         void Shutdown();
-        void Draw(const Image &image, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1);
+        void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1);
         void Render();
         int GetImageId(const Image &image);
         static Renderer *GetInstance();

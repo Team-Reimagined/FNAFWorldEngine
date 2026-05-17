@@ -13,11 +13,11 @@ namespace FWE::Renderer
         vulkan.Shutdown();
     }
 
-    void Renderer::Draw(const Image &image, int x, int y, float scaleX, float scaleY)
+    void Renderer::Draw(const FWE::Types::Atlas &atlas, int x, int y, float scaleX, float scaleY)
     {
-        if(image.data != nullptr)
+        if(atlas.img.data != nullptr)
         {
-            vulkan.Draw(image, x, y, scaleX, scaleY);
+            vulkan.Draw(atlas, x, y, scaleX, scaleY);
         }
         //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
     }
