@@ -48,10 +48,17 @@ namespace FWE::Nodes
         glm::vec2 globalPostion = GetGlobalPosition();
         glm::vec2 globalScale = GetGlobalScale();
 
+        glm::vec2 tileCount = {1, 1};
+        if(tile)
+        {
+            tileCount.x = scale.x;
+            tileCount.y = scale.y;
+        } 
+
         atlas.x = xPos;
         atlas.y = yPos;
 
-        Renderer::Renderer::GetInstance()->Draw(atlas, globalPostion.x, globalPostion.y, globalScale.x, globalScale.y);
+        Renderer::Renderer::GetInstance()->Draw(atlas, globalPostion.x, globalPostion.y, globalScale.x, globalScale.y, tileCount.x, tileCount.y);
 
         atlas.x = startX;
         atlas.y = startY;

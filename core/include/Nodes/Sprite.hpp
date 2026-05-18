@@ -12,5 +12,6 @@ namespace FWE::Nodes
         void Draw() override;
     public:
         FWE::Types::Atlas atlas;
+        bool tile = false;
     };
 }

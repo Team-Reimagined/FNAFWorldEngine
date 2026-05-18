@@ -593,7 +593,7 @@ namespace FWE::Renderer::Vulkan
         frameStarted = true;
     }
 
-    void Vulkan::Draw(const FWE::Types::Atlas &atlas, int x, int y, float scaleX, float scaleY)
+    void Vulkan::Draw(const FWE::Types::Atlas &atlas, int x, int y, float scaleX, float scaleY, float tileX, float tileY)
     {
         if(!frameStarted)
         {
@@ -654,20 +654,21 @@ namespace FWE::Renderer::Vulkan
         transform[3][0] = convertRange(x, 0, drawExtent.width, -1, 1);
         transform[3][1] = convertRange(y, 0, drawExtent.height, -1, 1);
 
+        glm::vec2 uvScale;
+        uvScale.x = convertRange(atlas.width, 0, atlas.img.width, 0, 1);
+        uvScale.y = convertRange(atlas.height, 0, atlas.img.height, 0, 1);
+
         glm::vec2 uvOffset;
         uvOffset.x = convertRange(atlas.x, 0, atlas.img.width, 0, 1);
         uvOffset.y = convertRange(atlas.y, 0, atlas.img.height, 0, 1);
 
-        glm::vec2 uvScale;
-        uvScale.x = convertRange(atlas.width, 0, atlas.img.width, 0, 1);
-        uvScale.y = convertRange(atlas.height, 0, atlas.img.height, 0, 1);
-        
         pushConstants.worldMatrix = transform;
         pushConstants.vertexBuffer = rectangle.vertexBufferAddress;
-        pushConstants.uvOffset = uvOffset;
         pushConstants.uvScale = uvScale;
+        pushConstants.uvOffset = uvOffset;
+        pushConstants.tileCount = {tileX, tileY};
 
-        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
+        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
         vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
         vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);

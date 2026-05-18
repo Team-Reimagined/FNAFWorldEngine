@@ -48,17 +48,18 @@ int main() {
     FWE::Nodes::Sprite background;
     background.atlas = backgroundAtlas;
     background.position = {400, 240};
+    background.scale = {1, 1};
 
     FWE::Nodes::AnimatedSprite freddy;
     freddy.atlas = freddyBonnieAtlas;
     freddy.frameCount = 11;
-    freddy.position = {300, 249};
+    freddy.position = {300, 240};
 
     FWE::Nodes::AnimatedSprite bonnie;
     bonnie.atlas = freddyBonnieAtlas;
     bonnie.atlas.y = 250;
     bonnie.frameCount = 11;
-    bonnie.position = {500, 249};
+    bonnie.position = {500, 240};
 
     bool running = true;
     while (running)

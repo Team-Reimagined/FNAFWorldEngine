@@ -56,7 +56,7 @@ namespace FWE::Renderer::Vulkan
         void Init(bool fixedResolution, bool fullscreen);
         void Shutdown();
         void Render();
-        void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1);
+        void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1);
         int AddImage(const Image &image);
         static Vulkan *GetInstance();
         

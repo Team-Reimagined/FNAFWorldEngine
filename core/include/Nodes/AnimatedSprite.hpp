@@ -20,6 +20,7 @@ namespace FWE::Nodes
         int frameCount = 1;
         int currentFrame = 0;
         bool playing = true;
+        bool tile = false;
     private:
         std::chrono::_V2::system_clock::time_point lastTime;
         double extraTime = 0;

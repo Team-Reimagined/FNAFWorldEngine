@@ -45,8 +45,9 @@ struct GPUDrawPushConstants
 {
     glm::mat4 worldMatrix;
     VkDeviceAddress vertexBuffer;
-    glm::vec2 uvOffset;
     glm::vec2 uvScale;
+    glm::vec2 uvOffset;
+    glm::vec2 tileCount;
 };
 
 #define VK_CHECK(x)                                                     \
