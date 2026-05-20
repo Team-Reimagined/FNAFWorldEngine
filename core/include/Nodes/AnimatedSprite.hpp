@@ -22,7 +22,7 @@ namespace FWE::Nodes
         bool playing = true;
         bool tile = false;
     private:
-        std::chrono::_V2::system_clock::time_point lastTime;
+        std::chrono::high_resolution_clock::time_point lastTime;
         double extraTime = 0;
     };
 }
