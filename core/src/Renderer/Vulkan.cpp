@@ -693,7 +693,14 @@ namespace FWE::Renderer::Vulkan
 
         Utils::CopyImageToImage(cmd, drawImage.image, swapchainImages[swapchainImageIndex], drawExtent, swapchainExtent);
 
-        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+        if(ImGui::GetDrawData() != nullptr)
+        {
+            DrawImgui(cmd, swapchainImageViews[swapchainImageIndex]);
+        }
+
+        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
         VK_CHECK(vkEndCommandBuffer(cmd));
 

@@ -8,6 +8,7 @@
 #include "Nodes/Sprite.hpp"
 #include "Nodes/AnimatedSprite.hpp"
 #include "Util/Logging.hpp"
+#include <backends/imgui_impl_vulkan.h>
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
@@ -78,10 +79,21 @@ int main() {
             }
             ImGui_ImplSDL3_ProcessEvent(&events);
         }
+
         background.Draw();
         freddy.Draw();
         bonnie.Draw();
         renderer->Render();
+
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Stats");
+		ImGui::Text("Stat");
+        ImGui::End();
+
+        ImGui::Render();
     }
     renderer->Shutdown();
 }
