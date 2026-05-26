@@ -1,4 +1,4 @@
-#include "Audio/types/Track.hpp"
+#include "Types/Track.hpp"
 
 #include "Util/Logging.hpp"
 

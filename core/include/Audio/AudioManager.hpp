@@ -4,7 +4,7 @@
 
 #include <SDL3_mixer/SDL_mixer.h>
 
-#include "Audio/types/Track.hpp"
+#include "Types/Track.hpp"
 
 namespace FWE::Audio {
     class AudioManager {

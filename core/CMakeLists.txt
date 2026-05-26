@@ -70,12 +70,12 @@ add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
 )
 target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR})
-target_link_libraries(imgui PRIVATE
+target_link_libraries(imgui PUBLIC
     Vulkan::Vulkan
     SDL3::SDL3
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME} PUBLIC
     SDL3::SDL3
     SDL3_mixer::SDL3_mixer
     glm::glm
@@ -118,5 +118,5 @@ endif()
 if (FWE_CORE_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
     add_executable(fwe_core_test ${TEST_SOURCES})
-    target_link_libraries(fwe_core_test PRIVATE FWECore Vulkan::Vulkan SDL3::SDL3 SDL3_mixer::SDL3_mixer imgui)
+    target_link_libraries(fwe_core_test PRIVATE FWECore)
 endif()
