@@ -14,14 +14,13 @@ int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
 
     const bool fixedResolution = false;
-    const bool fullscreen = true;
+    const bool fullscreen = false;
 
     renderer->Init(fixedResolution, fullscreen);
 
     bool running = true;
     while (running)
     {
-        auto startTime = std::chrono::high_resolution_clock::now();
         SDL_Event events;
         while(SDL_PollEvent(&events))
         {
