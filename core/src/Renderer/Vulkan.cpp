@@ -41,7 +41,7 @@ namespace FWE::Renderer::Vulkan
     void Vulkan::Init(bool fixedResolution, bool fullscreen)
     {
         SDL_Init(SDL_INIT_VIDEO);
-        window = SDL_CreateWindow(windowName, windowExtent.width, windowExtent.height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN * fullscreen);
+        window = SDL_CreateWindow(windowName, windowExtent.width, windowExtent.height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_FULLSCREEN * fullscreen);
         this->fixedResolution = fixedResolution;
 
         InitVulkan();
@@ -814,7 +814,7 @@ namespace FWE::Renderer::Vulkan
                 frames[i].deletionQueue.Flush();
             }
 
-            for(AllocatedImage &image : images)
+            for(auto &[id, image] : images)
             {
                 DestroyImage(image);
             }
@@ -908,9 +908,9 @@ namespace FWE::Renderer::Vulkan
         vmaDestroyImage(allocator, img.image, img.allocation);
     }
 
-    int Vulkan::AddImage(const Image &image)
+    int Vulkan::AddImage(const ResourceLoader::ImageResource &image)
     {
-        images.push_back(CreateImage(image.data, (VkExtent3D){image.width, image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT));
-        return images.size() - 1;
+        images.insert({imageId, CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT)});
+        return imageId++;
     }
 }

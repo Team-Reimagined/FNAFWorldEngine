@@ -13,9 +13,9 @@ namespace FWE::Scenes
         void Update();
         void Draw();
 
-        Scene(const std::string &scenePath);
+        Scene(const char *scenePath);
         ~Scene();
     private:
-        std::vector<std::unique_ptr<Nodes::Node>> nodes;
+        Nodes::Node *root;
     };
 }

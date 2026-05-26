@@ -15,7 +15,7 @@ namespace FWE::Renderer
 
     void Renderer::Draw(const FWE::Types::Atlas &atlas, int x, int y, float scaleX, float scaleY, float tileX, float tileY)
     {
-        if(atlas.img.data != nullptr)
+        if(atlas.img.id != -1)
         {
             vulkan.Draw(atlas, x, y, scaleX, scaleY, tileX, tileY);
         }
@@ -35,7 +35,7 @@ namespace FWE::Renderer
         return &instance;
     }
 
-    int Renderer::GetImageId(const Image &image)
+    int Renderer::AddImage(const ResourceLoader::ImageResource &image)
     {
         return vulkan.AddImage(image);
     }

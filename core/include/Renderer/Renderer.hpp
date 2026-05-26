@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include "Renderer/Image.hpp"
+#include "ResourceLoader/ImageLoader.hpp"
 #include "Renderer/Vulkan.hpp"
 #include "Types/Atlas.hpp"
 
@@ -14,7 +14,7 @@ namespace FWE::Renderer
         void Shutdown();
         void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1);
         void Render();
-        int GetImageId(const Image &image);
+        int AddImage(const ResourceLoader::ImageResource &image);
         static Renderer *GetInstance();
     private:
         SDL_Window *window;

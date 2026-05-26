@@ -6,6 +6,7 @@ namespace FWE::Nodes
     AnimatedSprite::AnimatedSprite() : Node()
     {
         RegisterVariable("Atlas", Types::Atlas, &atlas);
+        RegisterVariable("Tile", Types::Bool, &tile);
         RegisterVariable("Framerate", Types::Float, &framerate);
         RegisterVariable("CurrentFrame", Types::Int, &currentFrame);
         RegisterVariable("FrameCount", Types::Int, &frameCount);

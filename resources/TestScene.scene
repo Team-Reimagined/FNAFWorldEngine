@@ -1,0 +1,65 @@
+{
+    "Root":
+    {
+        "ChildCount": 3,
+        "Children":
+        [
+            {
+                "Type": "Sprite",
+                "Name": "Background",
+                "Position": [400, 240],
+                "Scale": [1, 1],
+                "Atlas":
+                [
+                    "Background.png",
+                    0,
+                    0,
+                    800,
+                    480
+                ],
+                "Tile": false,
+                "ChildCount": 0
+            },
+            {
+                "Type": "AnimatedSprite",
+                "Name": "Freddy",
+                "Position": [300, 240],
+                "Scale": [1, 1],
+                "Atlas":
+                [
+                    "FreddyBonnieAtlas.png",
+                    0,
+                    0,
+                    250,
+                    250
+                ],
+                "Tile": false,
+                "Framerate": 30,
+                "CurrentFrame": 0,
+                "FrameCount": 11,
+                "Playing": true,
+                "ChildCount": 0
+            },
+            {
+                "Type": "AnimatedSprite",
+                "Name": "Bonnie",
+                "Position": [500, 240],
+                "Scale": [1, 1],
+                "Atlas":
+                [
+                    "FreddyBonnieAtlas.png",
+                    0,
+                    250,
+                    250,
+                    250
+                ],
+                "Tile": false,
+                "Framerate": 30,
+                "CurrentFrame": 0,
+                "FrameCount": 11,
+                "Playing": true,
+                "ChildCount": 0
+            }
+        ]
+    }
+}

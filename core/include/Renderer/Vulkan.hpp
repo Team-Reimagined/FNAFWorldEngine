@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include "VulkanDescriptors.hpp"
 #include "Types/Atlas.hpp"
+#include "ResourceLoader/ImageLoader.hpp"
+#include <unordered_map>
 
 namespace FWE::Renderer::Vulkan
 {
@@ -57,7 +59,7 @@ namespace FWE::Renderer::Vulkan
         void Shutdown();
         void Render();
         void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1);
-        int AddImage(const Image &image);
+        int AddImage(const ResourceLoader::ImageResource &image);
         static Vulkan *GetInstance();
         
     private:
@@ -144,7 +146,7 @@ namespace FWE::Renderer::Vulkan
         GPUMeshBuffers rectangle;
 
         AllocatedImage blackImage;
-        std::vector<AllocatedImage> images;
+        std::unordered_map<int, AllocatedImage> images;
 
         VkSampler defaultSamplerLinear;
         VkSampler defaultSamplerNearest;
@@ -162,5 +164,7 @@ namespace FWE::Renderer::Vulkan
         bool fixedResolution = true;
 
         bool frameStarted = false;
+
+        int imageId = 0;
     };
 }

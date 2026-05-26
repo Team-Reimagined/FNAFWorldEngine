@@ -9,8 +9,14 @@
 #include "Nodes/AnimatedSprite.hpp"
 #include "Util/Logging.hpp"
 #include <backends/imgui_impl_vulkan.h>
+#include "Nodes/Initialize.hpp"
+#include "ResourceLoader/ImageLoader.hpp"
+#include "Scenes/SceneManager.hpp"
 
 int main() {
+
+    FWE::Nodes::Initalize();
+
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
 
     const bool fixedResolution = false;
@@ -26,46 +32,12 @@ int main() {
     track->SetVolume(1.75f);
     track->Play();
 
-    FWE::Renderer::Image backgroundImg("Background.png");
-    FWE::Types::Atlas backgroundAtlas =
-    {
-        .img = backgroundImg,
-        .x = 0,
-        .y = 0,
-        .width = 800,
-        .height = 480
-    };
-  
-    FWE::Renderer::Image freddyBonnieImg("FreddyBonnieAtlas.png");
-    FWE::Types::Atlas freddyBonnieAtlas = 
-    {
-        .img = freddyBonnieImg,
-        .x = 0,
-        .y = 0,
-        .width = 250,
-        .height = 250
-    };
-
-    FWE::Nodes::Sprite background;
-    background.atlas = backgroundAtlas;
-    background.position = {400, 240};
-    background.scale = {1, 1};
-
-    FWE::Nodes::AnimatedSprite freddy;
-    freddy.atlas = freddyBonnieAtlas;
-    freddy.frameCount = 11;
-    freddy.position = {300, 240};
-
-    FWE::Nodes::AnimatedSprite bonnie;
-    bonnie.atlas = freddyBonnieAtlas;
-    bonnie.atlas.y = 250;
-    bonnie.frameCount = 11;
-    bonnie.position = {500, 240};
-
+    FWE::Scenes::SceneManager *sceneManager = FWE::Scenes::SceneManager::GetInstance();
+    sceneManager->LoadScene("TestScene.scene"); 
+    
     bool running = true;
     while (running)
     {
-        auto startTime = std::chrono::high_resolution_clock::now();
         SDL_Event events;
         while(SDL_PollEvent(&events))
         {
@@ -80,9 +52,10 @@ int main() {
             ImGui_ImplSDL3_ProcessEvent(&events);
         }
 
-        background.Draw();
-        freddy.Draw();
-        bonnie.Draw();
+        if(!sceneManager->Update())
+        {
+            running = false;
+        }
         renderer->Render();
 
         ImGui_ImplVulkan_NewFrame();

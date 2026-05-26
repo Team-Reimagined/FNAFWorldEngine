@@ -1,0 +1,48 @@
+#include "ResourceLoader/ImageLoader.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "External/stb_image.h"
+#include "Util/Logging.hpp"
+#include "Renderer/Renderer.hpp"
+
+namespace FWE::ResourceLoader
+{
+    ImageLoader::~ImageLoader()
+    {
+        for(auto &[str, resource] : imageData)
+        {
+            stbi_image_free(resource.data);
+        }
+        imageData.clear();
+    }
+
+    Renderer::Image ImageLoader::LoadImage(const char *filePath)
+    {
+        if(imageData.find(filePath) != imageData.end())
+        {
+            return imageData.at(filePath).image;
+        }
+        else
+        {
+            ImageResource resource;
+            resource.data = stbi_load(filePath, (int *)&resource.image.width, (int *)&resource.image.height, &resource.image.n, 4);
+            resource.image.filePath = filePath;
+            if(resource.data != nullptr)
+            {
+                Renderer::Renderer *renderer = Renderer::Renderer::GetInstance();
+                resource.image.id = renderer->AddImage(resource);
+                imageData.insert({filePath, resource});
+            }
+            else
+            {
+                Util::Logging::error("Unable to load image at path: {}", filePath);
+            }
+            return resource.image;
+        }
+    }
+
+    ImageLoader *ImageLoader::GetInstance()
+    {
+        static ImageLoader loader;
+        return &loader;
+    }
+}

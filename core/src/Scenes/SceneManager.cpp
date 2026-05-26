@@ -2,11 +2,18 @@
 
 namespace FWE::Scenes
 {
-    void SceneManager::LoadScene()
+    SceneManager *SceneManager::GetInstance()
     {
+        static SceneManager sceneManager;
+        return &sceneManager;
+    }
+
+    void SceneManager::LoadScene(const char *path)
+    {
+        scenePath = path;
         loadQueuedScene = [=, this]()
         {
-            currentScene = new Scene(scenePath);
+            currentScene = new Scene(scenePath.c_str());
         };
         sceneChanged = true;
     }

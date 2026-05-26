@@ -10,7 +10,7 @@ namespace FWE::Scenes
     class SceneManager
     {
     public:
-        void LoadScene();
+        void LoadScene(const char *path);
         void QueueSceneUnload();
         bool Update();
         static SceneManager *GetInstance();

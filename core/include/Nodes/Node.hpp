@@ -41,5 +41,6 @@ namespace FWE::Nodes
         std::vector<Node *> children;
         glm::vec2 position = {0, 0};
         glm::vec2 scale = {1, 1};
+        std::string name;
     };
 }

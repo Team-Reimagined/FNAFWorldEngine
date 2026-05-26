@@ -5,7 +5,9 @@ namespace FWE::Nodes
 {
     Node::Node()
     {
+        RegisterVariable("Name", Types::String, &name);
         RegisterVariable("Position", Types::Vector2, &position);
+        RegisterVariable("Scale", Types::Vector2, &scale);
     }
 
     void Node::RegisterVariable(const char *name, Types type, void *variable)
