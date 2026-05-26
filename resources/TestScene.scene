@@ -11,7 +11,7 @@
                 "Scale": [1, 1],
                 "Atlas":
                 [
-                    "Background.png",
+                    "resources/Background.png",
                     0,
                     0,
                     800,
@@ -27,7 +27,7 @@
                 "Scale": [1, 1],
                 "Atlas":
                 [
-                    "FreddyBonnieAtlas.png",
+                    "resources/FreddyBonnieAtlas.png",
                     0,
                     0,
                     250,
@@ -47,7 +47,7 @@
                 "Scale": [1, 1],
                 "Atlas":
                 [
-                    "FreddyBonnieAtlas.png",
+                    "resources/FreddyBonnieAtlas.png",
                     0,
                     250,
                     250,

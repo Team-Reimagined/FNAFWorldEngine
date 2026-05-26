@@ -33,7 +33,7 @@ int main() {
     track->Play();
 
     FWE::Scenes::SceneManager *sceneManager = FWE::Scenes::SceneManager::GetInstance();
-    sceneManager->LoadScene("TestScene.scene"); 
+    sceneManager->LoadScene("resources/TestScene.scene"); 
     
     bool running = true;
     while (running)
