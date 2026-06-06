@@ -7,8 +7,12 @@
 #include "Types/Atlas.hpp"
 #include "Nodes/Sprite.hpp"
 #include "Nodes/AnimatedSprite.hpp"
+#include "UI/FontManager.hpp"
+#include "UI/UIHelper.hpp"
 #include "Util/Logging.hpp"
 #include <backends/imgui_impl_vulkan.h>
+
+#include "Panels/ProjectCreationPanel.hpp"
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
@@ -18,6 +22,15 @@ int main() {
 
     renderer->Init(fixedResolution, fullscreen);
 
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
+
+    FWE::UI::FontManager::get().Init();
+    auto fnafWorldFont = io.Fonts->AddFontFromFileTTF("resources/fonts/fnaf_world_font.ttf");
+    if (!fnafWorldFont) {
+        FWE::Util::Logging::error("Font not loading");
+    }
+    
     bool running = true;
     while (running)
     {
@@ -41,9 +54,16 @@ int main() {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Stats");
-		ImGui::Text("Stat");
-        ImGui::End();
+        int w = 0, h = 0;
+        SDL_GetWindowSizeInPixels(renderer->GetWindow(), &w, &h);
+        ImVec2 windowSize(w, h);
+
+        ImGui::SetNextWindowSize(windowSize);
+        FWE::UI::UIHelper::createPanel("MainPanel", windowSize, ImVec2(0, 0), [=]() {
+            auto projectCreationPanel = FWE::Panels::ProjectCreationPanel(FWE::UI::UIHelper::getCenter(windowSize, FWE::Panels::ProjectCreationPanel::panelSize));
+
+            
+        }, FWE::UI::UIHelper::DEFAULT_WINDOW_FLAGS | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         ImGui::Render();
     }
