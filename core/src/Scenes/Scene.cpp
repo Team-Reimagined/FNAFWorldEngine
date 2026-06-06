@@ -82,12 +82,16 @@ namespace FWE::Scenes
 
     void DestroyRecursive(Nodes::Node *node)
     {
-        
+        for(int i = 0; i < node->GetChildrenCount(); i++)
+        {
+            DestroyRecursive(node->GetChild(i));
+        }
+        delete node;
     }
 
     Scene::~Scene()
     {
-        
+        DestroyRecursive(root);
     }
 
     Nodes::Node *Scene::GetRoot()
