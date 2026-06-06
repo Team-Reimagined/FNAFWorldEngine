@@ -386,8 +386,6 @@ namespace FWE::Renderer::Vulkan
         VkDescriptorPool imguiPool;
         VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &imguiPool));
 
-        ImGui::CreateContext();
-
         ImGui_ImplSDL3_InitForVulkan(window);
 
         ImGui_ImplVulkan_InitInfo initInfo = {};
@@ -912,5 +910,9 @@ namespace FWE::Renderer::Vulkan
     {
         images.insert({imageId, CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT)});
         return imageId++;
+    }
+
+    SDL_Window* Vulkan::GetWindow() {
+        return this->window;
     }
 }

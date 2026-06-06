@@ -20,16 +20,11 @@ int main() {
     const bool fixedResolution = false;
     const bool fullscreen = false;
 
-    renderer->Init(fixedResolution, fullscreen);
-
+    ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontDefault();
+    FWE::UI::FontManager::Get().Init();
 
-    FWE::UI::FontManager::get().Init();
-    auto fnafWorldFont = io.Fonts->AddFontFromFileTTF("resources/fonts/fnaf_world_font.ttf");
-    if (!fnafWorldFont) {
-        FWE::Util::Logging::error("Font not loading");
-    }
+    renderer->Init(fixedResolution, fullscreen);
     
     bool running = true;
     while (running)
@@ -58,11 +53,8 @@ int main() {
         SDL_GetWindowSizeInPixels(renderer->GetWindow(), &w, &h);
         ImVec2 windowSize(w, h);
 
-        ImGui::SetNextWindowSize(windowSize);
-        FWE::UI::UIHelper::createPanel("MainPanel", windowSize, ImVec2(0, 0), [=]() {
-            auto projectCreationPanel = FWE::Panels::ProjectCreationPanel(FWE::UI::UIHelper::getCenter(windowSize, FWE::Panels::ProjectCreationPanel::panelSize));
-
-            
+        FWE::UI::UIHelper::CreatePanel("MainPanel", windowSize, ImVec2(0, 0), [=]() {
+            auto projectCreationPanel = FWE::Panels::ProjectCreationPanel(FWE::UI::UIHelper::GetCenter(windowSize, FWE::Panels::ProjectCreationPanel::panelSize));
         }, FWE::UI::UIHelper::DEFAULT_WINDOW_FLAGS | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         ImGui::Render();
