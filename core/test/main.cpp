@@ -26,8 +26,7 @@ int main() {
     const bool fullscreen = false;
 
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    
+
     renderer->Init(fixedResolution, fullscreen);
   
     FWE::Audio::AudioManager* am = FWE::Audio::AudioManager::GetInstance();

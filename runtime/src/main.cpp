@@ -5,6 +5,7 @@
 #include <chrono>
 #include <string>
 #include "External/json.hpp"
+#include <imgui.h>
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
@@ -13,6 +14,8 @@ int main() {
     const bool fixedResolution = true;
     const bool fullscreen = true;
 
+    ImGui::CreateContext();
+    
     renderer->Init(fixedResolution, fullscreen);
     FWE::Nodes::Initalize();
     std::ifstream runtimeConfigFile("resources/runtime.json");
