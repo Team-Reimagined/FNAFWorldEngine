@@ -11,12 +11,12 @@ namespace FWE::Nodes
         RegisterVariable("CurrentFrame", Types::Int, &currentFrame);
         RegisterVariable("FrameCount", Types::Int, &frameCount);
         RegisterVariable("Playing", Types::Bool, &playing);
-        lastTime = std::chrono::high_resolution_clock::now();
+        lastTime = std::chrono::steady_clock::now();
     }
 
     void AnimatedSprite::SetCurrentFrame()
     {
-        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto currentTime = std::chrono::steady_clock::now();
         
         double delta = std::chrono::duration<double>(currentTime - lastTime).count();
         int framesToAdvance = delta / (1.f / framerate);

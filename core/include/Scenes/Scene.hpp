@@ -13,6 +13,8 @@ namespace FWE::Scenes
         void Update();
         void Draw();
 
+        Nodes::Node *GetRoot();
+
         Scene(const char *scenePath);
         ~Scene();
     private:

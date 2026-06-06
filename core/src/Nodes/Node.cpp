@@ -59,4 +59,28 @@ namespace FWE::Nodes
         }
         return globalScale;
     }
+
+    Node *Node::GetParent()
+    {
+        return parent;
+    }
+
+    Node *Node::GetChild(unsigned int index)
+    {
+        if(index >= children.size())
+        {
+            return nullptr;
+        }
+        return children[index];
+    }
+
+    std::vector<Node *> &Node::GetChildren()
+    {
+        return children;
+    }
+
+    unsigned int Node::GetChildrenCount()
+    {
+        return children.size();
+    }
 }

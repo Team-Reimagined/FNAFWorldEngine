@@ -172,7 +172,7 @@ namespace FWE::Renderer::Vulkan
     VkDescriptorSet DescriptorAllocatorGrowable::Allocate(VkDevice device, VkDescriptorSetLayout layout, void *pNext)
     {
         VkDescriptorPool poolToUse = GetPool(device);
-
+        
         VkDescriptorSetAllocateInfo allocInfo = {};
         allocInfo.pNext = pNext;
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;

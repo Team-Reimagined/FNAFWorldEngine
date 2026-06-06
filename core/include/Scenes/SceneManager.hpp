@@ -14,6 +14,7 @@ namespace FWE::Scenes
         void QueueSceneUnload();
         bool Update();
         static SceneManager *GetInstance();
+        Scene *GetCurrentScene();
     private:
         void UnloadCurrentScene();
     private:

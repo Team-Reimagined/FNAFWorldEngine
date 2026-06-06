@@ -80,17 +80,27 @@ namespace FWE::Scenes
         LoadChildren(sceneData.at("Root"), root);
     }
 
+    void DestroyRecursive(Nodes::Node *node)
+    {
+        
+    }
+
     Scene::~Scene()
     {
+        
+    }
 
+    Nodes::Node *Scene::GetRoot()
+    {
+        return root;
     }
 
     void UpdateRecursive(FWE::Nodes::Node *node)
     {
         node->Update();
-        for(int i = 0; i < node->children.size(); i++)
+        for(int i = 0; i < node->GetChildrenCount(); i++)
         {
-            UpdateRecursive(node->children[i]);
+            UpdateRecursive(node->GetChild(i));
         }
     }
 
@@ -102,9 +112,9 @@ namespace FWE::Scenes
     void DrawRecursive(FWE::Nodes::Node *node)
     {
         node->Draw();
-        for(int i = 0; i < node->children.size(); i++)
+        for(int i = 0; i < node->GetChildrenCount(); i++)
         {
-            DrawRecursive(node->children[i]);
+            DrawRecursive(node->GetChild(i));
         }
     }
 

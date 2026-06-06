@@ -8,12 +8,12 @@
 namespace FWE::Panels {
     ProjectCreationPanel::ProjectCreationPanel(ImVec2 pos)
         : UI::UIPanel("ProjectCreationPanel", panelSize, pos, [this]() {
-            this->render();
+            this->Render();
         }, UI::UIHelper::DEFAULT_WINDOW_FLAGS) {
             
         }
     
-    void ProjectCreationPanel::render() {
+    void ProjectCreationPanel::Render() {
         ImVec2 windowSize = ImGui::GetWindowSize();
 
         ImVec2 childrenSize = ImVec2(150, 150);

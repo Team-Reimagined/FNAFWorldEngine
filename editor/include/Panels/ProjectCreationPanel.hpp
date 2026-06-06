@@ -9,6 +9,6 @@ namespace FWE::Panels {
 
         ProjectCreationPanel(ImVec2 pos);
 
-        void render();
+        void Render();
     };
 }

@@ -18,6 +18,11 @@ namespace FWE::Scenes
         sceneChanged = true;
     }
 
+    Scene *SceneManager::GetCurrentScene()
+    {
+        return currentScene;
+    }
+
     void SceneManager::QueueSceneUnload()
     {
         sceneChanged = true;
