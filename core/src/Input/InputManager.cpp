@@ -22,15 +22,40 @@ namespace FWE::Input
         case SDL_EVENT_KEY_DOWN:
             if(!event->key.repeat)
             {
-                Util::Logging::info("Down: {}", event->key.key);
                 keysJustPressed[event->key.scancode] = true;
+                keysPressed[event->key.scancode] = true;
             }
             break;
         case SDL_EVENT_KEY_UP:
-            Util::Logging::info("Up: {}", event->key.key);
             keysJustReleased[event->key.scancode] = true;
+            keysPressed[event->key.scancode] = false;
         default:
             break;
         }
+    }
+
+    bool InputManager::IsKeyPressed(SDL_Keycode key)
+    {
+        return keysPressed[SDL_GetScancodeFromKey(key, nullptr)];
+    }
+    bool InputManager::IsKeyJustPressed(SDL_Keycode key)
+    {
+        return keysJustPressed[SDL_GetScancodeFromKey(key, nullptr)];
+    }
+    bool InputManager::IsKeyJustReleased(SDL_Keycode key)
+    {
+        return keysJustReleased[SDL_GetScancodeFromKey(key, nullptr)];
+    }
+    bool InputManager::IsPhysicalKeyPressed(SDL_Scancode key)
+    {
+        return keysPressed[key];
+    }
+    bool InputManager::IsPhysicalKeyJustPressed(SDL_Scancode key)
+    {
+        return keysJustPressed[key];
+    }
+    bool InputManager::IsPhysicalKeyJustReleased(SDL_Scancode key)
+    {
+        return keysJustReleased[key];
     }
 }
