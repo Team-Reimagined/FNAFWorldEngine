@@ -60,7 +60,7 @@ namespace FWE::Renderer::Vulkan
         void Render();
         void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1);
         int AddImage(const ResourceLoader::ImageResource &image);
-        SDL_Window* GetWindow();
+        SDL_Window *GetWindow();
         static Vulkan *GetInstance();
         
     private:

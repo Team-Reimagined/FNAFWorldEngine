@@ -15,6 +15,7 @@
 #include "UI/UIPanel.hpp"
 #include "UI/UIHelper.hpp"
 #include "misc/cpp/imgui_stdlib.h"
+#include "Input/InputManager.hpp"
 
 int main() {
 
@@ -24,8 +25,6 @@ int main() {
 
     const bool fixedResolution = false;
     const bool fullscreen = false;
-
-    ImGui::CreateContext();
 
     renderer->Init(fixedResolution, fullscreen);
   
@@ -39,22 +38,22 @@ int main() {
 
     FWE::Scenes::SceneManager *sceneManager = FWE::Scenes::SceneManager::GetInstance();
     sceneManager->LoadScene("resources/TestScene.scene"); 
+
+    FWE::Input::InputManager *inputManager = FWE::Input::InputManager::GetInstance();
     
     bool running = true;
     while (running)
     {
-        SDL_Event events;
-        while(SDL_PollEvent(&events))
+        SDL_PumpEvents();
+        SDL_Event event;
+        while(SDL_PollEvent(&event))
         {
-            switch (events.type)
+            if(event.type == SDL_EVENT_QUIT)
             {
-            case SDL_EVENT_QUIT:
                 running = false;
-                break;
-            default:
-                break;
             }
-            ImGui_ImplSDL3_ProcessEvent(&events);
+            inputManager->ProcessEvent(&event);
+            ImGui_ImplSDL3_ProcessEvent(&event);
         }
 
         if(!sceneManager->Update())

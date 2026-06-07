@@ -5,16 +5,15 @@
 #include <chrono>
 #include <string>
 #include "External/json.hpp"
-#include <imgui.h>
+#include "Input/InputManager.hpp"
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
     FWE::Scenes::SceneManager *sceneManager = FWE::Scenes::SceneManager::GetInstance();
+    FWE::Input::InputManager *inputManager = FWE::Input::InputManager::GetInstance();
 
     const bool fixedResolution = true;
     const bool fullscreen = true;
-
-    ImGui::CreateContext();
     
     renderer->Init(fixedResolution, fullscreen);
     FWE::Nodes::Initalize();
@@ -27,20 +26,20 @@ int main() {
     while (running)
     {
         auto startTime = std::chrono::steady_clock::now();
-        running = sceneManager->Update();
-        SDL_Event events;
-        while(SDL_PollEvent(&events))
+        SDL_Event event;
+        while(SDL_PollEvent(&event))
         {
-            switch (events.type)
+            if(event.type == SDL_EVENT_QUIT)
             {
-            case SDL_EVENT_QUIT:
                 running = false;
-                break;
-            default:
-                break;
             }
+            inputManager->ProcessEvent(&event);
         }
 
+        if(!sceneManager->Update())
+        {
+            running = false;
+        }
         renderer->Render();
         const std::chrono::duration<double> frameTime(1./60.);
         std::this_thread::sleep_until(startTime + frameTime);

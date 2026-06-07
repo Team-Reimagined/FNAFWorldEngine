@@ -3,9 +3,9 @@ namespace FWE::Util {
     template <typename T>
     class Singleton {
     public:
-        static T Get() {
+        static T *GetInstance() {
             static T instance;
-            return instance;
+            return &instance;
         }
     };
 }

@@ -20,11 +20,9 @@ int main() {
     const bool fixedResolution = false;
     const bool fullscreen = false;
 
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    FWE::UI::FontManager::Get().Init();
-
     renderer->Init(fixedResolution, fullscreen);
+    
+    FWE::UI::FontManager::GetInstance()->Init();
     
     bool running = true;
     while (running)

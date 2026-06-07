@@ -40,7 +40,9 @@ namespace FWE::Renderer
         return vulkan.AddImage(image);
     }
 
-    SDL_Window* Renderer::GetWindow() {
+    SDL_Window *Renderer::GetWindow()
+    {
         return vulkan.GetWindow();
     }
+    
 };

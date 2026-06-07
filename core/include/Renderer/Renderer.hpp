@@ -4,6 +4,7 @@
 #include "ResourceLoader/ImageLoader.hpp"
 #include "Renderer/Vulkan.hpp"
 #include "Types/Atlas.hpp"
+#include <imgui.h>
 
 namespace FWE::Renderer
 {
@@ -15,7 +16,7 @@ namespace FWE::Renderer
         void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1);
         void Render();
         int AddImage(const ResourceLoader::ImageResource &image);
-        SDL_Window* GetWindow();
+        SDL_Window *GetWindow();
         static Renderer *GetInstance();
     private:
         SDL_Window *window;
