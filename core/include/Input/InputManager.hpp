@@ -7,6 +7,7 @@ namespace FWE::Input
     {
     public:
         static InputManager *GetInstance();
+        void ClearBuffers();
         void ProcessEvent(const SDL_Event *event);
     private:
         bool keysPressed[SDL_SCANCODE_COUNT];

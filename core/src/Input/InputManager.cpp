@@ -9,6 +9,12 @@ namespace FWE::Input
         return &manager;
     }
 
+    void InputManager::ClearBuffers()
+    {
+        memset(keysJustPressed, 0, sizeof(keysJustPressed));
+        memset(keysJustReleased, 0, sizeof(keysJustReleased));
+    }
+    
     void InputManager::ProcessEvent(const SDL_Event *event)
     {
         switch (event->type)

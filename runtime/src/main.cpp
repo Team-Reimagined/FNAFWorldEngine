@@ -26,6 +26,7 @@ int main() {
     while (running)
     {
         auto startTime = std::chrono::steady_clock::now();
+        inputManager->ClearBuffers();
         SDL_Event event;
         while(SDL_PollEvent(&event))
         {

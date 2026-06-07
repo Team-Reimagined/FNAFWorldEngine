@@ -44,7 +44,7 @@ int main() {
     bool running = true;
     while (running)
     {
-        SDL_PumpEvents();
+        inputManager->ClearBuffers();
         SDL_Event event;
         while(SDL_PollEvent(&event))
         {
