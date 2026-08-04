@@ -9,14 +9,16 @@ namespace FWE::MarionetteUI
     {
         Left,
         Center,
-        Right
+        Right,
+        FullHorizontal
     };
 
     enum VerticalAlignment
     {
         Top,
         Middle,
-        Bottom
+        Bottom,
+        FullVertical
     };
 
     class UIElement

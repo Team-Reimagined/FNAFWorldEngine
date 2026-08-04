@@ -12,7 +12,8 @@ namespace FWE::Types
         uint32_t width;
         uint32_t height;
     
-        static Atlas CreateFromImage(FWE::Renderer::Image img) {
+        static Atlas CreateFromImage(FWE::Renderer::Image img)
+        {
             return {img, 0, 0, img.width, img.height};
         }   
     };

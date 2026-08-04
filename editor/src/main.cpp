@@ -30,7 +30,7 @@ int main() {
 
     // FWE::Types::Atlas atlas = FWE::Types::Atlas::CreateFromImage(img);
 
-    FWE::MarionetteUI::TextInput input({0, 0}, {200, 50}, font, img, false, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Middle);
+    FWE::MarionetteUI::TextInput input({0, 0}, {200, 50}, font, img, false, "Temp", FWE::MarionetteUI::HorizontalAlignment::FullHorizontal, FWE::MarionetteUI::VerticalAlignment::FullVertical);
 
     uiManager->AddUIElementToTree(&input);
     

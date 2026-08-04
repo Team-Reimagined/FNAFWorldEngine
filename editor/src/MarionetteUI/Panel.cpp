@@ -24,6 +24,21 @@ namespace FWE::MarionetteUI
             tileCount.y = size.y / atlas.img.height;
         }
         glm::vec2 offset = GetAlignmentOffset();
-        Renderer::Renderer::GetInstance()->Draw(atlas, position.x + offset.x, position.y + offset.y, size.x / atlas.img.width, size.y / atlas.img.height);
+        glm::vec2 scale = {size.x / atlas.img.width, size.y / atlas.img.height};
+        if(horizontalAlignment == FullHorizontal)
+        {
+            SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
+            int windowWitdh;
+            SDL_GetWindowSizeInPixels(window, &windowWitdh, NULL);
+            scale.x = (float)windowWitdh / atlas.img.width;
+        }
+        if(verticalAlignnment == FullVertical)
+        {
+            SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
+            int windowHeight;
+            SDL_GetWindowSizeInPixels(window, NULL, &windowHeight);
+            scale.y = (float)windowHeight / atlas.img.height;
+        }
+        Renderer::Renderer::GetInstance()->Draw(atlas, position.x + offset.x, position.y + offset.y, scale.x, scale.y);
     }
 }

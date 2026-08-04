@@ -93,6 +93,7 @@ namespace FWE::MarionetteUI
             offset.x = size.x / 2.;
             break;
         case Center:
+        case FullHorizontal:
         {
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowWidth;
@@ -118,6 +119,7 @@ namespace FWE::MarionetteUI
             offset.y = size.y / 2.;
             break;
         case Middle:
+        case FullVertical:
         {
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowHeight;
