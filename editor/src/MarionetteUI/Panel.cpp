@@ -9,6 +9,12 @@ namespace FWE::MarionetteUI
         this->tile = tile;
     }
 
+    Panel::Panel(glm::vec2 position, glm::vec2 size, Renderer::Image image, bool tile, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment) : UIElement(position, size, horizontalAlignment, verticalAlignnment)
+    {
+        this->atlas = Types::Atlas::CreateFromImage(image);
+        this->tile = tile;
+    }
+
     void Panel::Draw()
     {
         glm::vec2 tileCount = {1, 1};

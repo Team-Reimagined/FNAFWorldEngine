@@ -26,11 +26,11 @@ int main() {
 
     FWE::MarionetteUI::Font font = {uiManager->LoadFont("resources/fonts/fnaf_world_font.ttf"), 32};
 
-    FWE::Renderer::Image img = FWE::ResourceLoader::ImageLoader::GetInstance()->LoadImage("resources/Background.png");
+    FWE::Renderer::Image img = imgLoader->LoadImage("resources/Background.png");
 
-    FWE::Types::Atlas atlas = {img, 0, 0, 800, 480};
+    // FWE::Types::Atlas atlas = FWE::Types::Atlas::CreateFromImage(img);
 
-    FWE::MarionetteUI::TextInput input({0, 0}, {200, 50}, font, atlas, false, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Middle);
+    FWE::MarionetteUI::TextInput input({0, 0}, {200, 50}, font, img, false, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Middle);
 
     uiManager->AddUIElementToTree(&input);
     

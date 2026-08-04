@@ -11,6 +11,7 @@ namespace FWE::MarionetteUI
     {
     public:
         Panel(glm::vec2 position, glm::vec2 size, Types::Atlas atlas, bool tile = false, HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top);
+        Panel(glm::vec2 position, glm::vec2 size, Renderer::Image image, bool tile = false, HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top);
         void Draw() override;
     public:
         bool tile = false;

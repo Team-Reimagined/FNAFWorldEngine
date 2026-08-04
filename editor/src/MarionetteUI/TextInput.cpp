@@ -11,6 +11,15 @@ namespace FWE::MarionetteUI
         
     }
 
+    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment) : 
+    userLabel(position, "", font, horizontalAlignment, verticalAlignnment), 
+    placeholderLabel(position, placeholderText, font, horizontalAlignment, verticalAlignnment), 
+    panel(position, size, image, tile, horizontalAlignment, verticalAlignnment), 
+    UIElement(position, size, horizontalAlignment, verticalAlignnment)
+    {
+        
+    }
+
     void TextInput::SetPlaceholderText(const char *str)
     {
         placeholderLabel.SetText(str);
