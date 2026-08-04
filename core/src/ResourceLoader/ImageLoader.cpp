@@ -8,10 +8,6 @@ namespace FWE::ResourceLoader
 {
     ImageLoader::~ImageLoader()
     {
-        for(auto &[str, resource] : imageData)
-        {
-            stbi_image_free(resource.data);
-        }
         imageData.clear();
     }
 
@@ -19,18 +15,18 @@ namespace FWE::ResourceLoader
     {
         if(imageData.find(filePath) != imageData.end())
         {
-            return imageData.at(filePath).image;
+            return imageData.at(filePath);
         }
         else
         {
             ImageResource resource;
             resource.data = stbi_load(filePath, (int *)&resource.image.width, (int *)&resource.image.height, &resource.image.n, 4);
-            resource.image.filePath = filePath;
             if(resource.data != nullptr)
             {
                 Renderer::Renderer *renderer = Renderer::Renderer::GetInstance();
                 resource.image.id = renderer->AddImage(resource);
-                imageData.insert({filePath, resource});
+                stbi_image_free(resource.data);
+                imageData.insert({filePath, resource.image});
             }
             else
             {

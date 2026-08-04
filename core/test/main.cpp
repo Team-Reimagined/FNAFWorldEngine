@@ -3,18 +3,13 @@
 #include <thread>
 #include <chrono>
 #include "Audio/AudioManager.hpp"
-#include "backends/imgui_impl_sdl3.h"
 #include "Types/Atlas.hpp"
 #include "Nodes/Sprite.hpp"
 #include "Nodes/AnimatedSprite.hpp"
 #include "Util/Logging.hpp"
-#include <backends/imgui_impl_vulkan.h>
 #include "Nodes/Initialize.hpp"
 #include "ResourceLoader/ImageLoader.hpp"
 #include "Scenes/SceneManager.hpp"
-#include "UI/UIPanel.hpp"
-#include "UI/UIHelper.hpp"
-#include "misc/cpp/imgui_stdlib.h"
 #include "Input/InputManager.hpp"
 
 int main() {
@@ -53,7 +48,6 @@ int main() {
                 running = false;
             }
             inputManager->ProcessEvent(&event);
-            ImGui_ImplSDL3_ProcessEvent(&event);
         }
 
         if(!sceneManager->Update())
@@ -61,17 +55,6 @@ int main() {
             running = false;
         }
         renderer->Render();
-
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Stats");
-		ImGui::Text("Stat");
-
-        ImGui::End();
-
-        ImGui::Render();
     }
     renderer->Shutdown();
 }

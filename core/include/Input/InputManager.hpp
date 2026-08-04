@@ -1,5 +1,7 @@
 #pragma once
 #include <SDL3/SDL.h>
+#include <functional>
+#include <vector>
 
 namespace FWE::Input
 {
@@ -15,9 +17,11 @@ namespace FWE::Input
         bool IsPhysicalKeyPressed(SDL_Scancode key);
         bool IsPhysicalKeyJustPressed(SDL_Scancode key);
         bool IsPhysicalKeyJustReleased(SDL_Scancode key);
+        void AddInputCallback(std::function<void(const SDL_Event *event)> callback);
     private:
         bool keysPressed[SDL_SCANCODE_COUNT];
         bool keysJustPressed[SDL_SCANCODE_COUNT];
         bool keysJustReleased[SDL_SCANCODE_COUNT];
+        std::vector<std::function<void(const SDL_Event *event)>> inputCallbacks;
     };
 }

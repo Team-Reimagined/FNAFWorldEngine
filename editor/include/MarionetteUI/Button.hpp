@@ -1,0 +1,23 @@
+#pragma once
+
+#include "Label.hpp"
+#include "Panel.hpp"
+#include <functional>
+#include "UIElement.hpp"
+
+namespace FWE::MarionetteUI
+{
+    class Button : public UIElement
+    {
+    public:
+        Button(glm::vec2 position, glm::vec2 size, const char *str, Font font, Types::Atlas atlas, bool tile = false, HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top);
+        void SetCallback(std::function<void()> callback);
+        void Pressed();
+        void Draw() override;
+    public:
+        Label label;
+        Panel panel;
+    private:
+        std::function<void()> callback = [](){};
+    };
+};

@@ -24,6 +24,6 @@ namespace FWE::ResourceLoader
         static ImageLoader *GetInstance();
         FWE::Renderer::Image LoadImage(const char *filePath);
     private:
-        std::unordered_map<std::string, ImageResource> imageData;
+        std::unordered_map<std::string, Renderer::Image> imageData;
     };
 }

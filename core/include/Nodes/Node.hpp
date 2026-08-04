@@ -27,6 +27,7 @@ namespace FWE::Nodes
     {
     public:
         Node();
+        ~Node();
         virtual void Init() {}
         virtual void Update() {}
         virtual void Draw() {}
@@ -37,6 +38,8 @@ namespace FWE::Nodes
         Node *GetChild(unsigned int index);
         std::vector<Node *> &GetChildren();
         unsigned int GetChildrenCount();
+        void RemoveChild(unsigned int index);
+        void RemoveFromTree();
     protected:
         void RegisterVariable(const char *name, Types type, void *variable);
     public:
@@ -44,6 +47,7 @@ namespace FWE::Nodes
         glm::vec2 position = {0, 0};
         glm::vec2 scale = {1, 1};
         std::string name;
+        bool visible = true;
     private:
         Node *parent = nullptr;
         std::vector<Node *> children;

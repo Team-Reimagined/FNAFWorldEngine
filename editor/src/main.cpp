@@ -3,28 +3,39 @@
 #include <thread>
 #include <chrono>
 #include "Audio/AudioManager.hpp"
-#include "backends/imgui_impl_sdl3.h"
 #include "Types/Atlas.hpp"
 #include "Nodes/Sprite.hpp"
 #include "Nodes/AnimatedSprite.hpp"
-#include "UI/FontManager.hpp"
-#include "UI/UIHelper.hpp"
 #include "Util/Logging.hpp"
-#include <backends/imgui_impl_vulkan.h>
-
-#include "Panels/ProjectCreationPanel.hpp"
+#include "MarionetteUI/Label.hpp"
+#include "Input/InputManager.hpp"
+#include "MarionetteUI/Button.hpp"
+#include "MarionetteUI/TextInput.hpp"
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
+    FWE::MarionetteUI::UIManager *uiManager = FWE::MarionetteUI::UIManager::GetInstance();
+    FWE::Input::InputManager *inputManager = FWE::Input::InputManager::GetInstance();
+    FWE::ResourceLoader::ImageLoader *imgLoader = FWE::ResourceLoader::ImageLoader::GetInstance();
 
     const bool fixedResolution = false;
     const bool fullscreen = false;
 
     renderer->Init(fixedResolution, fullscreen);
-    
-    FWE::UI::FontManager::GetInstance()->Init();
+    uiManager->Init();
+
+    FWE::MarionetteUI::Font font = {uiManager->LoadFont("resources/fonts/fnaf_world_font.ttf"), 32};
+
+    FWE::Renderer::Image img = FWE::ResourceLoader::ImageLoader::GetInstance()->LoadImage("resources/Background.png");
+
+    FWE::Types::Atlas atlas = {img, 0, 0, 800, 480};
+
+    FWE::MarionetteUI::TextInput input({0, 0}, {200, 50}, font, atlas, false, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Middle);
+
+    uiManager->AddUIElementToTree(&input);
     
     bool running = true;
+
     while (running)
     {
         SDL_Event events;
@@ -38,24 +49,10 @@ int main() {
             default:
                 break;
             }
-            ImGui_ImplSDL3_ProcessEvent(&events);
+            inputManager->ProcessEvent(&events);
         }
-
+        uiManager->Draw();
         renderer->Render();
-
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        int w = 0, h = 0;
-        SDL_GetWindowSizeInPixels(renderer->GetWindow(), &w, &h);
-        ImVec2 windowSize(w, h);
-
-        FWE::UI::UIHelper::CreatePanel("MainPanel", windowSize, ImVec2(0, 0), [=]() {
-            auto projectCreationPanel = FWE::Panels::ProjectCreationPanel(FWE::UI::UIHelper::GetCenter(windowSize, FWE::Panels::ProjectCreationPanel::panelSize));
-        }, FWE::UI::UIHelper::DEFAULT_WINDOW_FLAGS | ImGuiWindowFlags_NoBringToFrontOnFocus);
-
-        ImGui::Render();
     }
     renderer->Shutdown();
 }

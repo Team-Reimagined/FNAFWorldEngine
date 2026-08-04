@@ -10,6 +10,18 @@ namespace FWE::Nodes
         RegisterVariable("Scale", Types::Vector2, &scale);
     }
 
+    Node::~Node()
+    {
+        for(int i = 0; i < parent->GetChildrenCount(); i++)
+        {
+            if(parent->GetChild(i) == this)
+            {
+                parent->RemoveChild(i);
+                break;
+            }
+        }
+    }
+
     void Node::RegisterVariable(const char *name, Types type, void *variable)
     {
         if(variable != nullptr)
@@ -82,5 +94,26 @@ namespace FWE::Nodes
     unsigned int Node::GetChildrenCount()
     {
         return children.size();
+    }
+
+    void Node::RemoveChild(unsigned int index)
+    {
+        if(index >= children.size())
+        {
+            return;
+        }
+        children.erase(children.begin() + index);
+    }
+
+    void Node::RemoveFromTree()
+    {
+        for(int i = 0; i < parent->GetChildrenCount(); i++)
+        {
+            if(parent->GetChild(i) == this)
+            {
+                parent->RemoveChild(i);
+                break;
+            }
+        }
     }
 }

@@ -11,9 +11,9 @@ namespace FWE::Renderer::Vulkan
 {
     struct AllocatedImage
     {
-        VkImage image;
-        VkImageView imageView;
-        VmaAllocation allocation;
+        VkImage image = nullptr;
+        VkImageView imageView = nullptr;
+        VmaAllocation allocation = nullptr;
         VkExtent3D imageExtent;
         VkFormat imageFormat;  
     };
@@ -60,6 +60,7 @@ namespace FWE::Renderer::Vulkan
         void Render();
         void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1);
         int AddImage(const ResourceLoader::ImageResource &image);
+        void RemoveImage(const Image &image);
         SDL_Window *GetWindow();
         static Vulkan *GetInstance();
         
@@ -77,9 +78,6 @@ namespace FWE::Renderer::Vulkan
 
         void CreateSwapchain(uint32_t width, uint32_t height);
         void DestroySwapchain();
-        
-        void InitImgui();
-        void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
 
         AllocatedBuffer CreateBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
         void DestroyBuffer(const AllocatedBuffer &buffer);
@@ -147,7 +145,8 @@ namespace FWE::Renderer::Vulkan
         GPUMeshBuffers rectangle;
 
         AllocatedImage blackImage;
-        std::unordered_map<int, AllocatedImage> images;
+        std::vector<AllocatedImage> images;
+        std::vector<uint32_t> freeImageIndexes;
 
         VkSampler defaultSamplerLinear;
         VkSampler defaultSamplerNearest;
@@ -160,12 +159,8 @@ namespace FWE::Renderer::Vulkan
 
         bool resizeRequested = false;
 
-        double aspectRatio;
-
         bool fixedResolution = true;
 
         bool frameStarted = false;
-
-        int imageId = 0;
     };
 }

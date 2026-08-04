@@ -51,30 +51,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
-FetchContent_Declare(
-    imgui
-    GIT_REPOSITORY https://github.com/ocornut/imgui
-    GIT_TAG v1.92.7
-)
-FetchContent_MakeAvailable(imgui)
-
 find_package(Vulkan)
-
-add_library(imgui STATIC 
-    ${imgui_SOURCE_DIR}/imgui.cpp
-    ${imgui_SOURCE_DIR}/imgui_draw.cpp
-    ${imgui_SOURCE_DIR}/imgui_tables.cpp
-    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-    ${imgui_SOURCE_DIR}/imgui_demo.cpp
-    ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
-)
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR})
-target_link_libraries(imgui PUBLIC
-    Vulkan::Vulkan
-    SDL3::SDL3
-)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     SDL3::SDL3
@@ -83,7 +60,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     vk-bootstrap::vk-bootstrap
     GPUOpen::VulkanMemoryAllocator
     Vulkan::Vulkan
-    imgui
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include/ ${vulkanmemoryallocator_SOURCE_DIR}/include)

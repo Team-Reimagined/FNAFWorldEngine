@@ -40,6 +40,11 @@ namespace FWE::Renderer
         return vulkan.AddImage(image);
     }
 
+    void Renderer::RemoveImage(const Image &image)
+    {
+        vulkan.RemoveImage(image);
+    }
+
     SDL_Window *Renderer::GetWindow()
     {
         return vulkan.GetWindow();

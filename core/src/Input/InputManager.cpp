@@ -32,6 +32,10 @@ namespace FWE::Input
         default:
             break;
         }
+        for(auto i : inputCallbacks)
+        {
+            i(event);
+        }
     }
 
     bool InputManager::IsKeyPressed(SDL_Keycode key)
@@ -57,5 +61,10 @@ namespace FWE::Input
     bool InputManager::IsPhysicalKeyJustReleased(SDL_Scancode key)
     {
         return keysJustReleased[key];
+    }
+
+    void InputManager::AddInputCallback(std::function<void(const SDL_Event *event)> callback)
+    {
+        inputCallbacks.push_back(callback);
     }
 }

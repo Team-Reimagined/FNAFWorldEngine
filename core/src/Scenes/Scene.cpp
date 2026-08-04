@@ -115,10 +115,13 @@ namespace FWE::Scenes
 
     void DrawRecursive(FWE::Nodes::Node *node)
     {
-        node->Draw();
-        for(int i = 0; i < node->GetChildrenCount(); i++)
+        if(node->visible)
         {
-            DrawRecursive(node->GetChild(i));
+            node->Draw();
+            for(int i = 0; i < node->GetChildrenCount(); i++)
+            {
+                DrawRecursive(node->GetChild(i));
+            }
         }
     }
 

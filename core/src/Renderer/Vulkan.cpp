@@ -16,9 +16,6 @@
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
 
-#include "imgui.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_vulkan.h"
 #include <glm/packing.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
@@ -51,7 +48,6 @@ namespace FWE::Renderer::Vulkan
         InitDescriptors();
         InitPipelines();
         InitDefaultData();
-        InitImgui();
 
         initalized = true;
     }
@@ -105,8 +101,6 @@ namespace FWE::Renderer::Vulkan
     void Vulkan::InitSwapchain()
     {
         CreateSwapchain(windowExtent.width, windowExtent.height);
-
-        aspectRatio = (double)windowExtent.width / (double)windowExtent.height;
         
         VkExtent3D drawImageExtent = {windowExtent.width, windowExtent.height, 1};
 
@@ -357,62 +351,6 @@ namespace FWE::Renderer::Vulkan
         });
 
         
-    }
-
-    void Vulkan::InitImgui()
-    {
-        VkDescriptorPoolSize poolSizes[] =
-        {
-            {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-            {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
-        };
-
-        VkDescriptorPoolCreateInfo poolInfo = {};
-        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-        poolInfo.maxSets = 1000;
-        poolInfo.poolSizeCount = (uint32_t)std::size(poolSizes);
-        poolInfo.pPoolSizes = poolSizes;
-
-        VkDescriptorPool imguiPool;
-        VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &imguiPool));
-
-        ImGui::CreateContext();
-
-        ImGui_ImplSDL3_InitForVulkan(window);
-
-        ImGui_ImplVulkan_InitInfo initInfo = {};
-        initInfo.Instance = instance;
-        initInfo.PhysicalDevice = gpu;
-        initInfo.Device = device;
-        initInfo.Queue = graphicsQueue;
-        initInfo.DescriptorPool = imguiPool;
-        initInfo.MinImageCount = 3;
-        initInfo.ImageCount = 3;
-        initInfo.UseDynamicRendering = true;
-
-        initInfo.PipelineInfoMain.PipelineRenderingCreateInfo = {.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO};
-        initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-        initInfo.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &swapchainImageFormat;
-
-        initInfo.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-
-        ImGui_ImplVulkan_Init(&initInfo);
-
-        mainDeletionQueue.PushFunction([=, this]()
-        {
-            ImGui_ImplVulkan_Shutdown();
-            vkDestroyDescriptorPool(device, imguiPool, nullptr);
-        });
     }
 
     void Vulkan::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)> &&function)
@@ -693,14 +631,7 @@ namespace FWE::Renderer::Vulkan
 
         Utils::CopyImageToImage(cmd, drawImage.image, swapchainImages[swapchainImageIndex], drawExtent, swapchainExtent);
 
-        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-        if(ImGui::GetDrawData() != nullptr)
-        {
-            DrawImgui(cmd, swapchainImageViews[swapchainImageIndex]);
-        }
-
-        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
         VK_CHECK(vkEndCommandBuffer(cmd));
 
@@ -775,18 +706,6 @@ namespace FWE::Renderer::Vulkan
         resizeRequested = false;
     }
 
-    void Vulkan::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
-    {
-        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(targetImageView, nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-        VkRenderingInfo renderInfo = Utils::RenderingInfo(swapchainExtent, &colorAttachment, nullptr);
-
-        vkCmdBeginRendering(cmd, &renderInfo);
-
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
-
-        vkCmdEndRendering(cmd);
-    }
-
     void Vulkan::DestroySwapchain()
     {
         vkDestroySwapchainKHR(device, swapchain, nullptr);
@@ -814,7 +733,7 @@ namespace FWE::Renderer::Vulkan
                 frames[i].deletionQueue.Flush();
             }
 
-            for(auto &[id, image] : images)
+            for(auto &image : images)
             {
                 DestroyImage(image);
             }
@@ -910,8 +829,25 @@ namespace FWE::Renderer::Vulkan
 
     int Vulkan::AddImage(const ResourceLoader::ImageResource &image)
     {
-        images.insert({imageId, CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT)});
-        return imageId++;
+        uint32_t imageId = images.size();
+        if(freeImageIndexes.size() > 0)
+        {
+            imageId = freeImageIndexes.back();
+            freeImageIndexes.pop_back();
+            images[imageId] = CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+            return imageId;
+        }
+
+        images.push_back(CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT));
+        return imageId;
+    }
+
+    void Vulkan::RemoveImage(const Image &image)
+    {
+        DestroyImage(images[image.id]);
+        freeImageIndexes.push_back(image.id);
+        std::sort(freeImageIndexes.begin(), freeImageIndexes.end(), std::greater<int>());
+        images[image.id] = {};
     }
 
     SDL_Window *Vulkan::GetWindow()
