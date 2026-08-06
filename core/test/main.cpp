@@ -1,16 +1,12 @@
+#include "Audio/Track.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Audio/AudioManager.hpp"
-#include <thread>
-#include <chrono>
 #include "Audio/AudioManager.hpp"
-#include "Types/Atlas.hpp"
-#include "Nodes/Sprite.hpp"
-#include "Nodes/AnimatedSprite.hpp"
-#include "Util/Logging.hpp"
 #include "Nodes/Initialize.hpp"
-#include "ResourceLoader/ImageLoader.hpp"
 #include "Scenes/SceneManager.hpp"
 #include "Input/InputManager.hpp"
+#include "ResourceLoader/AudioLoader.hpp"
+#include <stdbool.h>
 
 int main() {
 
@@ -23,13 +19,14 @@ int main() {
 
     renderer->Init(fixedResolution, fullscreen);
   
-    FWE::Audio::AudioManager* am = FWE::Audio::AudioManager::GetInstance();
+    FWE::Audio::AudioManager* audioManager = FWE::Audio::AudioManager::GetInstance();
+    FWE::ResourceLoader::AudioLoader *audioLoader = FWE::ResourceLoader::AudioLoader::GetInstance();
 
-    am->Init();
-    auto audio = am->LoadAudio("bulletproof.mp3");
-    auto track = am->CreateTrack(audio);
-    track->SetVolume(1.75f);
-    track->Play();
+    audioManager->Init();
+
+    FWE::Audio::Track track = audioLoader->LoadAudio("resources/PartyFavorraspyPart_AC01__3.wav");
+    track.SetVolume(.25);
+    track.Play();
 
     FWE::Scenes::SceneManager *sceneManager = FWE::Scenes::SceneManager::GetInstance();
     sceneManager->LoadScene("resources/TestScene.scene"); 
@@ -49,7 +46,6 @@ int main() {
             }
             inputManager->ProcessEvent(&event);
         }
-
         if(!sceneManager->Update())
         {
             running = false;

@@ -8,9 +8,6 @@
 #include "Renderer/VulkanImages.hpp"
 #include "Renderer/VulkanPipelines.hpp"
 
-#include <chrono>
-#include <thread>
-
 #include <VkBootstrap.h>
 
 #define VMA_IMPLEMENTATION

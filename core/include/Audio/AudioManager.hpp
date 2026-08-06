@@ -1,10 +1,6 @@
 #pragma once
 
-#include <string>
-
 #include <SDL3_mixer/SDL_mixer.h>
-
-#include "Types/Track.hpp"
 
 namespace FWE::Audio {
     class AudioManager {
@@ -15,10 +11,8 @@ namespace FWE::Audio {
         }
 
         bool Init();
-        MIX_Audio* LoadAudio(std::string filePath);
 
-        Track* CreateTrack();
-        Track* CreateTrack(MIX_Audio* audio);
+        MIX_Mixer* GetMixer();
 
     private:
         MIX_Mixer* mixer;

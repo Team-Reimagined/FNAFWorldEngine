@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <cstdint>
 #include <unordered_map>
 #include <string>
 #include "Renderer/Image.hpp"

@@ -1,5 +1,4 @@
 #include "Input/InputManager.hpp"
-#include "Util/Logging.hpp"
 
 namespace FWE::Input
 {

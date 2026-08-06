@@ -1,15 +1,5 @@
 #include "Renderer/Renderer.hpp"
-#include "Audio/AudioManager.hpp"
-#include <thread>
-#include <chrono>
-#include "Audio/AudioManager.hpp"
-#include "Types/Atlas.hpp"
-#include "Nodes/Sprite.hpp"
-#include "Nodes/AnimatedSprite.hpp"
-#include "Util/Logging.hpp"
-#include "MarionetteUI/Label.hpp"
 #include "Input/InputManager.hpp"
-#include "MarionetteUI/Button.hpp"
 #include "MarionetteUI/TextInput.hpp"
 
 int main() {

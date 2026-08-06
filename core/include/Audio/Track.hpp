@@ -5,7 +5,9 @@
 namespace FWE::Audio {
     class Track {
     public:
-        Track(MIX_Mixer* mixer);
+        Track();
+        Track(const Track& track);
+        ~Track();
         void Play();
 
         void SetAudio(MIX_Audio* audio);
@@ -16,6 +18,6 @@ namespace FWE::Audio {
     private:
         MIX_Track* mixerTrack;
         MIX_Audio* audio;
-        float volume;
+        float volume = 1;
     };
 }
