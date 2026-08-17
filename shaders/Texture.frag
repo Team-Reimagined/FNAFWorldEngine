@@ -13,15 +13,16 @@ layout(set =0, binding = 0) uniform sampler2D displayTexture;
 layout( push_constant ) uniform constants
 {	
 	layout(offset = 72) vec2 uvScale;
-	layout(offset = 80) vec2 uvOffset;
-	layout(offset = 88) vec2 tileCount;
+	vec2 uvOffset;
+	vec2 tileCount;
+	uint colorPacked;
 } PushConstants;
 
 void main() 
 {
 	vec2 outUV;
-
 	outUV.x = mod(inUV.x * PushConstants.tileCount.x, max(1., PushConstants.tileCount.x * PushConstants.uvScale.x) / PushConstants.tileCount.x);
 	outUV.y = mod(inUV.y * PushConstants.tileCount.y, max(1., PushConstants.tileCount.y * PushConstants.uvScale.y) / PushConstants.tileCount.y);
-	outFragColor = texture(displayTexture,outUV + PushConstants.uvOffset);
+	vec4 colorMod = unpackUnorm4x8(PushConstants.colorPacked);
+	outFragColor = texture(displayTexture, outUV + PushConstants.uvOffset) * colorMod;
 }

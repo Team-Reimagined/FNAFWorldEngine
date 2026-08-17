@@ -1,23 +1,43 @@
 #include "MarionetteUI/TextInput.hpp"
+#include "MarionetteUI/UIElement.hpp"
+#include "Types/Color.hpp"
 
 namespace FWE::MarionetteUI
 {
-    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment) : 
-    userLabel(position, "", font, horizontalAlignment, verticalAlignnment), 
-    placeholderLabel(position, placeholderText, font, horizontalAlignment, verticalAlignnment), 
-    panel(position, size, atlas, tile, horizontalAlignment, verticalAlignnment), 
+    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
+    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    panel(position, size, atlas, tile, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {
-        
+        userLabel.topLevel = false;
+        placeholderLabel.topLevel = false;
+        userLabel.MakeInternal(this);
+        placeholderLabel.MakeInternal(this);
     }
 
-    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment) : 
-    userLabel(position, "", font, horizontalAlignment, verticalAlignnment), 
-    placeholderLabel(position, placeholderText, font, horizontalAlignment, verticalAlignnment), 
-    panel(position, size, image, tile, horizontalAlignment, verticalAlignnment), 
+    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
+    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    panel(position, size, image, tile, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {
-        
+        userLabel.topLevel = false;
+        placeholderLabel.topLevel = false;
+        userLabel.MakeInternal(this);
+        placeholderLabel.MakeInternal(this);
+    }
+
+    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
+    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    panel(position, size, horizontalAlignment, verticalAlignnment, color), 
+    UIElement(position, size, horizontalAlignment, verticalAlignnment)
+    {
+        userLabel.topLevel = false;
+        placeholderLabel.topLevel = false;
+        userLabel.MakeInternal(this);
+        placeholderLabel.MakeInternal(this);
     }
 
     void TextInput::SetPlaceholderText(const char *str)

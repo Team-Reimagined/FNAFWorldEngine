@@ -36,6 +36,7 @@ namespace FWE::MarionetteUI
         void RemoveChild(unsigned int index);
         void RemoveFromTree();
         glm::vec2 GetAlignmentOffset();
+        void MakeInternal(UIElement *parent);
     public:
         glm::vec2 position = {0, 0};
         glm::vec2 size = {1, 1};
@@ -43,8 +44,10 @@ namespace FWE::MarionetteUI
         bool blockMouse = true;
         HorizontalAlignment horizontalAlignment = Left;
         VerticalAlignment verticalAlignnment = Top;
+        bool topLevel = true;
     private:
         UIElement *parent = nullptr;
         std::vector<UIElement *> children;
+        bool internal = false;
     };
 }

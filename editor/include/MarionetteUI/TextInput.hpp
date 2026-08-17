@@ -3,14 +3,16 @@
 #include "Label.hpp"
 #include <string>
 #include "Panel.hpp"
+#include "Types/Color.hpp"
 
 namespace FWE::MarionetteUI
 {
     class TextInput : public UIElement
     {
     public:
-        TextInput(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile = false, const char *placeholderText = "", HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top);
-        TextInput(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile = false, const char *placeholderText = "", HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top);
+        TextInput(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile = false, const char *placeholderText = "", HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top, Types::Color color = 0xFFFFFFFF);
+        TextInput(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile = false, const char *placeholderText = "", HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top, Types::Color color = 0xFFFFFFFF);
+        TextInput(glm::vec2 position, glm::vec2 size, Font font, const char *placeholderText = "", HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top, Types::Color color = 0xFFFFFFFF);
         void SetPlaceholderText(const char *str);
         void SetFont(TTF_Font *font);
         void SetFontSize(float size);

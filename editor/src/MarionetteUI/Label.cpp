@@ -1,8 +1,9 @@
 #include "MarionetteUI/Label.hpp"
+#include "Renderer/Renderer.hpp"
 
 namespace FWE::MarionetteUI
 {
-    Label::Label(glm::vec2 position, const char *str, Font font, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment) : UIElement(position, size, horizontalAlignment, verticalAlignnment)
+    Label::Label(glm::vec2 position, const char *str, Font font, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment) : UIElement(position, {1,1}, horizontalAlignment, verticalAlignnment)
     {
         blockMouse = false;
 

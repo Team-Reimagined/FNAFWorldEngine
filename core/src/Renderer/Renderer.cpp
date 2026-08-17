@@ -13,12 +13,18 @@ namespace FWE::Renderer
         vulkan.Shutdown();
     }
 
-    void Renderer::Draw(const FWE::Types::Atlas &atlas, int x, int y, float scaleX, float scaleY, float tileX, float tileY)
+    void Renderer::Draw(const FWE::Types::Atlas &atlas, float x, float y, float scaleX, float scaleY, float tileX, float tileY, Types::Color color)
     {
         if(atlas.img.id != -1)
         {
-            vulkan.Draw(atlas, x, y, scaleX, scaleY, tileX, tileY);
+            vulkan.Draw(atlas, x, y, scaleX, scaleY, tileX, tileY, color);
         }
+        //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
+    }
+
+    void Renderer::Draw(float x, float y, float sizeX, float sizeY, Types::Color color)
+    {
+        vulkan.Draw(x, y, sizeX, sizeY, color);
         //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
     }
 

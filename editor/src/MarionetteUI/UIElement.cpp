@@ -1,5 +1,4 @@
 #include "MarionetteUI/UIElement.hpp"
-#include "MarionetteUI/UIManager.hpp"
 #include "Util/Logging.hpp"
 #include "Renderer/Renderer.hpp"
 
@@ -90,7 +89,14 @@ namespace FWE::MarionetteUI
         switch (horizontalAlignment)
         {
         case Left:
-            offset.x = size.x / 2.;
+            if(topLevel)
+            {
+                offset.x = size.x / 2.;
+            }
+            else
+            {
+                offset.x = GetParent()->GetAlignmentOffset().x - GetParent()->size.x / 2. + size.x / 2.;
+            }
             break;
         case Center:
         case FullHorizontal:
@@ -98,7 +104,14 @@ namespace FWE::MarionetteUI
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowWidth;
             SDL_GetWindowSizeInPixels(window, &windowWidth, NULL);
-            offset.x = windowWidth / 2;
+            if(topLevel)
+            {
+                offset.x = windowWidth / 2.;
+            }
+            else
+            {
+                offset.x = GetParent()->GetAlignmentOffset().x;
+            }
             break;
         }
         case Right:
@@ -106,7 +119,14 @@ namespace FWE::MarionetteUI
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowWidth;
             SDL_GetWindowSizeInPixels(window, &windowWidth, NULL);
-            offset.x = windowWidth - size.x / 2.;
+            if(topLevel)
+            {
+                offset.x = windowWidth - size.x / 2.;
+            }
+            else
+            {
+                offset.x = GetParent()->GetAlignmentOffset().x + GetParent()->size.x / 2. - size.x / 2.;;
+            }
             break;
         }
         default:
@@ -116,7 +136,14 @@ namespace FWE::MarionetteUI
         switch (verticalAlignnment)
         {
         case Top:
-            offset.y = size.y / 2.;
+            if(topLevel)
+            {
+                offset.y = size.y / 2.;
+            }
+            else
+            {
+                offset.y = GetParent()->GetAlignmentOffset().y - GetParent()->size.y / 2. + size.y / 2.;
+            }
             break;
         case Middle:
         case FullVertical:
@@ -124,7 +151,14 @@ namespace FWE::MarionetteUI
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowHeight;
             SDL_GetWindowSizeInPixels(window, NULL, &windowHeight);
-            offset.y = windowHeight / 2;
+            if(topLevel)
+            {
+                offset.y = windowHeight / 2.;
+            }
+            else
+            {
+                offset.y = GetParent()->GetAlignmentOffset().y;
+            }
             break;
         }
         case Bottom:
@@ -132,7 +166,14 @@ namespace FWE::MarionetteUI
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowHeight;
             SDL_GetWindowSizeInPixels(window, NULL, &windowHeight);
-            offset.y = windowHeight - size.y / 2.;
+            if(topLevel)
+            {
+                offset.y = windowHeight - size.y / 2.;
+            }
+            else
+            {
+                offset.y = GetParent()->GetAlignmentOffset().y + GetParent()->size.y / 2 - size.y / 2.;
+            }
             break;
         }
         default:
@@ -140,5 +181,18 @@ namespace FWE::MarionetteUI
         }
 
         return offset;
+    }
+    
+    void UIElement::MakeInternal(UIElement *parent)
+    {
+        if(this->parent == nullptr)
+        {
+            this->parent = parent;
+            internal = true;
+        }
+        else
+        {
+            Util::Logging::error("UIElement is already a child of another UIElement");
+        }
     }
 }

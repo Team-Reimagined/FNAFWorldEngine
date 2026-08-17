@@ -7,6 +7,7 @@
 #include "Renderer/VulkanTypes.hpp"
 #include "Renderer/VulkanImages.hpp"
 #include "Renderer/VulkanPipelines.hpp"
+#include "Types/Color.hpp"
 
 #include <VkBootstrap.h>
 
@@ -336,15 +337,15 @@ namespace FWE::Renderer::Vulkan
         sample.minFilter = VK_FILTER_LINEAR;
         vkCreateSampler(device, &sample, nullptr, &defaultSamplerLinear);
 
-        uint32_t black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
-        blackImage = CreateImage((void*)&black, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+        uint32_t white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
+        whiteImage = CreateImage((void*)&white, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
 
         mainDeletionQueue.PushFunction([&]()
         {
             vkDestroySampler(device, defaultSamplerNearest, nullptr);
             vkDestroySampler(device, defaultSamplerLinear, nullptr);
 
-            DestroyImage(blackImage);
+            DestroyImage(whiteImage);
         });
 
         
@@ -506,7 +507,7 @@ namespace FWE::Renderer::Vulkan
         VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
         {
             DescriptorWriter writer;
-            writer.WriteImage(0, blackImage.imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+            writer.WriteImage(0, whiteImage.imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 
             writer.UpdateSet(device, imageSet);
         }
@@ -517,6 +518,7 @@ namespace FWE::Renderer::Vulkan
             
         push_constants.worldMatrix = glm::mat4 {1.f};
         push_constants.vertexBuffer = rectangle.vertexBufferAddress;
+        push_constants.color = 0x000000FF;
 
         vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &push_constants);
         vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
@@ -528,7 +530,86 @@ namespace FWE::Renderer::Vulkan
         frameStarted = true;
     }
 
-    void Vulkan::Draw(const FWE::Types::Atlas &atlas, int x, int y, float scaleX, float scaleY, float tileX, float tileY)
+    void Vulkan::Draw(float x, float y, float sizeX, float sizeY, FWE::Types::Color color)
+    {
+        if(!frameStarted)
+        {
+            StartFrame();
+        }
+
+        if(resizeRequested)
+        {
+            return;
+        }
+
+        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
+
+        VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
+        vkCmdBeginRendering(cmd, &renderInfo);
+
+        VkViewport viewport = {};
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.width = drawExtent.width;
+        viewport.height = drawExtent.height;
+        viewport.minDepth = 0.f;
+        viewport.maxDepth = 1.f;
+
+        vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset.x = 0;
+        scissor.offset.y = 0;
+        scissor.extent.width = drawExtent.width;
+        scissor.extent.height = drawExtent.height;
+
+        vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
+
+        VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
+        {
+            DescriptorWriter writer;
+            writer.WriteImage(0, whiteImage.imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+
+            writer.UpdateSet(device, imageSet);
+        }
+
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipelineLayout, 0, 1, &imageSet, 0, nullptr);
+
+        GPUDrawPushConstants pushConstants;
+        glm::mat4 transform = glm::mat4 {1.f};
+        auto convertRange = [](float value, float min1, float max1, float min2, float max2)
+        {
+            return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
+        };
+
+        transform[0][0] = convertRange(sizeX, 0, drawExtent.width, 0, 1);
+        transform[1][1] = convertRange(sizeY, 0, drawExtent.height, 0, 1);
+        
+        transform[3][0] = convertRange(x, 0, drawExtent.width, -1, 1);
+        transform[3][1] = convertRange(y, 0, drawExtent.height, -1, 1);
+
+        glm::vec2 uvScale = {1,1};
+
+        glm::vec2 uvOffset = {0,0};
+
+        pushConstants.worldMatrix = transform;
+        pushConstants.vertexBuffer = rectangle.vertexBufferAddress;
+        pushConstants.uvScale = uvScale;
+        pushConstants.uvOffset = uvOffset;
+        pushConstants.tileCount = {1, 1};
+        pushConstants.color = color;
+
+        vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
+        vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+        vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+
+        vkCmdEndRendering(cmd);
+    }
+
+    void Vulkan::Draw(const FWE::Types::Atlas &atlas, float x, float y, float scaleX, float scaleY, float tileX, float tileY, FWE::Types::Color color)
     {
         if(!frameStarted)
         {
@@ -602,6 +683,7 @@ namespace FWE::Renderer::Vulkan
         pushConstants.uvScale = uvScale;
         pushConstants.uvOffset = uvOffset;
         pushConstants.tileCount = {tileX, tileY};
+        pushConstants.color = color;
 
         vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
         vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);

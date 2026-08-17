@@ -1,8 +1,7 @@
 #pragma once
 
 #include <string>
-#include "UIManager.hpp"
-#include "Renderer/Renderer.hpp"
+#include "Types/Atlas.hpp"
 #include "UIElement.hpp"
 #include "Font.hpp"
 

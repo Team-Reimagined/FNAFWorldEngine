@@ -1,3 +1,6 @@
+#include "MarionetteUI/Panel.hpp"
+#include "MarionetteUI/UIElement.hpp"
+#include "MarionetteUI/UIManager.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Input/InputManager.hpp"
 #include "MarionetteUI/TextInput.hpp"
@@ -14,14 +17,14 @@ int main() {
     renderer->Init(fixedResolution, fullscreen);
     uiManager->Init();
 
-    FWE::MarionetteUI::Font font = {uiManager->LoadFont("resources/fonts/fnaf_world_font.ttf"), 32};
+    FWE::MarionetteUI::Font font = {uiManager->LoadFont("resources/fonts/fnaf_world_font.ttf"), 32, {0, 255, 255, 255}};
 
     FWE::Renderer::Image img = imgLoader->LoadImage("resources/Background.png");
 
-    // FWE::Types::Atlas atlas = FWE::Types::Atlas::CreateFromImage(img);
+    FWE::MarionetteUI::Panel panel({0, 0}, {1, 1}, img, false, FWE::MarionetteUI::FullHorizontal, FWE::MarionetteUI::FullVertical);
+    FWE::MarionetteUI::TextInput input({0, 0}, {150, 85}, font, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Middle, 0xA000FFFF);
 
-    FWE::MarionetteUI::TextInput input({0, 0}, {200, 50}, font, img, false, "Temp", FWE::MarionetteUI::HorizontalAlignment::FullHorizontal, FWE::MarionetteUI::VerticalAlignment::FullVertical);
-
+    uiManager->AddUIElementToTree(&panel);
     uiManager->AddUIElementToTree(&input);
     
     bool running = true;

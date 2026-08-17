@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Types/Color.hpp"
 #include "VulkanTypes.hpp"
 #include <SDL3/SDL.h>
 #include "VulkanDescriptors.hpp"
 #include "Types/Atlas.hpp"
 #include "ResourceLoader/ImageLoader.hpp"
-#include <unordered_map>
 
 namespace FWE::Renderer::Vulkan
 {
@@ -58,7 +58,8 @@ namespace FWE::Renderer::Vulkan
         void Init(bool fixedResolution, bool fullscreen);
         void Shutdown();
         void Render();
-        void Draw(const FWE::Types::Atlas &atlas, int x = 0, int y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1);
+        void Draw(const FWE::Types::Atlas &atlas, float x = 0, float y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1, FWE::Types::Color color = 0xFFFFFFFF);
+        void Draw(float x = 0, float y = 0, float sizeX = 1, float sizeY = 1, FWE::Types::Color color = 0xFFFFFFFF);
         int AddImage(const ResourceLoader::ImageResource &image);
         void RemoveImage(const Image &image);
         SDL_Window *GetWindow();
@@ -144,7 +145,7 @@ namespace FWE::Renderer::Vulkan
 
         GPUMeshBuffers rectangle;
 
-        AllocatedImage blackImage;
+        AllocatedImage whiteImage;
         std::vector<AllocatedImage> images;
         std::vector<uint32_t> freeImageIndexes;
 

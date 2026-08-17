@@ -1,22 +1,15 @@
 #pragma once
 
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
-#include <span>
-#include <array>
-#include <functional>
-#include <deque>
-
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
 #include <vk_mem_alloc.h>
 
-#include "Util/Logging.hpp"
-
 #include <glm/mat4x4.hpp>
 #include <glm/vec4.hpp>
+
+#include "Types/Color.hpp"
+
+#include "Util/Logging.hpp"
 
 struct AllocatedBuffer
 {
@@ -48,6 +41,7 @@ struct GPUDrawPushConstants
     glm::vec2 uvScale;
     glm::vec2 uvOffset;
     glm::vec2 tileCount;
+    FWE::Types::Color color;
 };
 
 #define VK_CHECK(x)                                                     \

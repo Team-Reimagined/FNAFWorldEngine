@@ -1,5 +1,4 @@
 #include "MarionetteUI/UIManager.hpp"
-#include "Util/Logging.hpp"
 #include "Input/InputManager.hpp"
 #include "MarionetteUI/Button.hpp"
 #include "MarionetteUI/TextInput.hpp"
