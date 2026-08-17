@@ -530,7 +530,7 @@ namespace FWE::Renderer::Vulkan
         frameStarted = true;
     }
 
-    void Vulkan::Draw(float x, float y, float sizeX, float sizeY, FWE::Types::Color color)
+    void Vulkan::Draw(glm::vec2 position, glm::vec2 size, FWE::Types::Color color)
     {
         if(!frameStarted)
         {
@@ -584,11 +584,11 @@ namespace FWE::Renderer::Vulkan
             return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
         };
 
-        transform[0][0] = convertRange(sizeX, 0, drawExtent.width, 0, 1);
-        transform[1][1] = convertRange(sizeY, 0, drawExtent.height, 0, 1);
+        transform[0][0] = convertRange(size.x, 0, drawExtent.width, 0, 1);
+        transform[1][1] = convertRange(size.y, 0, drawExtent.height, 0, 1);
         
-        transform[3][0] = convertRange(x, 0, drawExtent.width, -1, 1);
-        transform[3][1] = convertRange(y, 0, drawExtent.height, -1, 1);
+        transform[3][0] = convertRange(position.x, 0, drawExtent.width, -1, 1);
+        transform[3][1] = convertRange(position.y, 0, drawExtent.height, -1, 1);
 
         glm::vec2 uvScale = {1,1};
 
@@ -609,7 +609,7 @@ namespace FWE::Renderer::Vulkan
         vkCmdEndRendering(cmd);
     }
 
-    void Vulkan::Draw(const FWE::Types::Atlas &atlas, float x, float y, float scaleX, float scaleY, float tileX, float tileY, FWE::Types::Color color)
+    void Vulkan::Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount, FWE::Types::Color color)
     {
         if(!frameStarted)
         {
@@ -664,11 +664,11 @@ namespace FWE::Renderer::Vulkan
             return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
         };
 
-        transform[0][0] = convertRange(atlas.width * scaleX, 0, drawExtent.width, 0, 1);
-        transform[1][1] = convertRange(atlas.height * scaleY, 0, drawExtent.height, 0, 1);
+        transform[0][0] = convertRange(atlas.width * scale.x, 0, drawExtent.width, 0, 1);
+        transform[1][1] = convertRange(atlas.height * scale.y, 0, drawExtent.height, 0, 1);
         
-        transform[3][0] = convertRange(x, 0, drawExtent.width, -1, 1);
-        transform[3][1] = convertRange(y, 0, drawExtent.height, -1, 1);
+        transform[3][0] = convertRange(position.x, 0, drawExtent.width, -1, 1);
+        transform[3][1] = convertRange(position.y, 0, drawExtent.height, -1, 1);
 
         glm::vec2 uvScale;
         uvScale.x = convertRange(atlas.width, 0, atlas.img.width, 0, 1);
@@ -682,7 +682,7 @@ namespace FWE::Renderer::Vulkan
         pushConstants.vertexBuffer = rectangle.vertexBufferAddress;
         pushConstants.uvScale = uvScale;
         pushConstants.uvOffset = uvOffset;
-        pushConstants.tileCount = {tileX, tileY};
+        pushConstants.tileCount = {tileCount.x, tileCount.y};
         pushConstants.color = color;
 
         vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);

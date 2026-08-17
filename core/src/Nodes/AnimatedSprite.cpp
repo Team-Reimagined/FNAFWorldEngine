@@ -59,7 +59,7 @@ namespace FWE::Nodes
         atlas.x = xPos;
         atlas.y = yPos;
 
-        Renderer::Renderer::GetInstance()->Draw(atlas, globalPostion.x, globalPostion.y, globalScale.x, globalScale.y, tileCount.x, tileCount.y);
+        Renderer::Renderer::GetInstance()->Draw(atlas, globalPostion, globalScale, tileCount);
 
         atlas.x = startX;
         atlas.y = startY;

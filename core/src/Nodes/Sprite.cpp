@@ -19,6 +19,6 @@ namespace FWE::Nodes
             tileCount.x = scale.x;
             tileCount.y = scale.y;
         } 
-        Renderer::Renderer::GetInstance()->Draw(atlas, globalPostion.x, globalPostion.y, globalScale.x, globalScale.y, tileCount.x, tileCount.y);
+        Renderer::Renderer::GetInstance()->Draw(atlas, globalPostion, globalScale, tileCount);
     }
 }

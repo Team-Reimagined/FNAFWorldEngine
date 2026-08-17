@@ -5,6 +5,7 @@
 #include "Renderer/Vulkan.hpp"
 #include "Types/Atlas.hpp"
 #include "Types/Color.hpp"
+#include "glm/ext/vector_float2.hpp"
 
 namespace FWE::Renderer
 {
@@ -13,8 +14,8 @@ namespace FWE::Renderer
     public:
         void Init(bool fixedResolution, bool fullscreen);
         void Shutdown();
-        void Draw(const FWE::Types::Atlas &atlas, float x = 0, float y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1, Types::Color color = 0xFFFFFFFF);
-        void Draw(float x = 0, float y = 0, float sizeX = 1, float sizeY = 1, Types::Color color = 0xFFFFFFFF);
+        void Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount = {1, 1}, Types::Color color = 0xFFFFFFFF);
+        void Draw(glm::vec2 position, glm::vec2 size, Types::Color color = 0xFFFFFFFF);
         void Render();
         int AddImage(const ResourceLoader::ImageResource &image);
         void RemoveImage(const Image &image);

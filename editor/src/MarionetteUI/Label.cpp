@@ -70,7 +70,7 @@ namespace FWE::MarionetteUI
     void Label::Draw()
     {
         glm::vec2 offset = GetAlignmentOffset();
-        Renderer::Renderer::GetInstance()->Draw(texture, position.x + offset.x, position.y + offset.y, size.x / texture.img.width, size.y / texture.img.height);
+        Renderer::Renderer::GetInstance()->Draw(texture, position + offset, {size.x / texture.img.width, size.y / texture.img.height});
     }
 
     glm::vec2 Label::GetTextSize()

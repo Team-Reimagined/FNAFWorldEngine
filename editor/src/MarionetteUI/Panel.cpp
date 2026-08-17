@@ -48,7 +48,7 @@ namespace FWE::MarionetteUI
             {
                 tileCount = scale;
             }
-            Renderer::Renderer::GetInstance()->Draw(atlas, position.x + offset.x, position.y + offset.y, scale.x, scale.y, tileCount.x, tileCount.y, color);
+            Renderer::Renderer::GetInstance()->Draw(atlas, position + offset, scale, tileCount, color);
         }
         else
         {
@@ -68,7 +68,7 @@ namespace FWE::MarionetteUI
                 SDL_GetWindowSizeInPixels(window, NULL, &windowHeight);
                 scale.y = (float)windowHeight;
             }
-            Renderer::Renderer::GetInstance()->Draw(position.x + offset.x, position.y + offset.y, scale.x, scale.y, color);
+            Renderer::Renderer::GetInstance()->Draw(position + offset, scale, color);
         }
     }
 }

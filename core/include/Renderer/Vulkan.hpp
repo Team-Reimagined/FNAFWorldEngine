@@ -58,8 +58,8 @@ namespace FWE::Renderer::Vulkan
         void Init(bool fixedResolution, bool fullscreen);
         void Shutdown();
         void Render();
-        void Draw(const FWE::Types::Atlas &atlas, float x = 0, float y = 0, float scaleX = 1, float scaleY = 1, float tileX = 1, float tileY = 1, FWE::Types::Color color = 0xFFFFFFFF);
-        void Draw(float x = 0, float y = 0, float sizeX = 1, float sizeY = 1, FWE::Types::Color color = 0xFFFFFFFF);
+        void Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount = {1, 1}, FWE::Types::Color color = 0xFFFFFFFF);
+        void Draw(glm::vec2 position, glm::vec2 size, FWE::Types::Color color = 0xFFFFFFFF);
         int AddImage(const ResourceLoader::ImageResource &image);
         void RemoveImage(const Image &image);
         SDL_Window *GetWindow();

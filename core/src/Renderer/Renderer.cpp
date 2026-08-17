@@ -1,4 +1,5 @@
 #include "Renderer/Renderer.hpp"
+#include "glm/ext/vector_float2.hpp"
 #include <SDL3/SDL_vulkan.h>
 
 namespace FWE::Renderer
@@ -13,18 +14,18 @@ namespace FWE::Renderer
         vulkan.Shutdown();
     }
 
-    void Renderer::Draw(const FWE::Types::Atlas &atlas, float x, float y, float scaleX, float scaleY, float tileX, float tileY, Types::Color color)
+    void Renderer::Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount, Types::Color color)
     {
         if(atlas.img.id != -1)
         {
-            vulkan.Draw(atlas, x, y, scaleX, scaleY, tileX, tileY, color);
+            vulkan.Draw(atlas, position, scale, tileCount, color);
         }
         //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
     }
 
-    void Renderer::Draw(float x, float y, float sizeX, float sizeY, Types::Color color)
+    void Renderer::Draw(glm::vec2 position, glm::vec2 size, Types::Color color)
     {
-        vulkan.Draw(x, y, sizeX, sizeY, color);
+        vulkan.Draw(position, size, color);
         //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
     }
 
