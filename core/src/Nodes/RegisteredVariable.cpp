@@ -125,5 +125,6 @@ namespace FWE::Nodes
         case Atlas:
             return *(FWE::Types::Atlas *)variable;
         }
+        return 0;
     }
 }

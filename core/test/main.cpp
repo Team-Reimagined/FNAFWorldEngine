@@ -34,6 +34,7 @@ int main() {
     FWE::Input::InputManager *inputManager = FWE::Input::InputManager::GetInstance();
     
     bool running = true;
+
     while (running)
     {
         inputManager->ClearBuffers();
