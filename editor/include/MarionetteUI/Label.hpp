@@ -10,7 +10,7 @@ namespace FWE::MarionetteUI
     class Label : public UIElement
     {
     public:
-        Label(glm::vec2 position, const char *str, Font font, HorizontalAlignment horizontalAlignment = Left, VerticalAlignment verticalAlignnment = Top);
+        Label(glm::vec2 position, const char *str, Font font, HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left, VerticalAlignment verticalAlignnment = VerticalAlignment::Top);
         void SetText(const char *str);
         void SetFont(TTF_Font *font);
         void SetFontSize(float size);

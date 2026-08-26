@@ -1,4 +1,5 @@
 #include "MarionetteUI/Panel.hpp"
+#include "MarionetteUI/UIElement.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Types/Color.hpp"
 
@@ -29,14 +30,14 @@ namespace FWE::MarionetteUI
         {
             glm::vec2 offset = GetAlignmentOffset();
             glm::vec2 scale = {size.x / atlas.img.width, size.y / atlas.img.height};
-            if(horizontalAlignment == FullHorizontal)
+            if(horizontalAlignment == HorizontalAlignment::Full)
             {
                 SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
                 int windowWitdh;
                 SDL_GetWindowSizeInPixels(window, &windowWitdh, NULL);
                 scale.x = (float)windowWitdh / atlas.img.width;
             }
-            if(verticalAlignnment == FullVertical)
+            if(verticalAlignnment == VerticalAlignment::Full)
             {
                 SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
                 int windowHeight;
@@ -54,14 +55,14 @@ namespace FWE::MarionetteUI
         {
             glm::vec2 offset = GetAlignmentOffset();
             glm::vec2 scale = size;
-            if(horizontalAlignment == FullHorizontal)
+            if(horizontalAlignment == HorizontalAlignment::Full)
             {
                 SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
                 int windowWitdh;
                 SDL_GetWindowSizeInPixels(window, &windowWitdh, NULL);
                 scale.x = (float)windowWitdh;
             }
-            if(verticalAlignnment == FullVertical)
+            if(verticalAlignnment == VerticalAlignment::Full)
             {
                 SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
                 int windowHeight;

@@ -11,7 +11,7 @@ namespace FWE::MarionetteUI
     {
         label.topLevel = false;
         label.horizontalAlignment = HorizontalAlignment::Center;
-        label.verticalAlignnment = VerticalAlignment::Middle;
+        label.verticalAlignnment = VerticalAlignment::Center;
         label.MakeInternal(this);
     }
 
@@ -22,7 +22,7 @@ namespace FWE::MarionetteUI
     {
         label.topLevel = false;
         label.horizontalAlignment = HorizontalAlignment::Center;
-        label.verticalAlignnment = VerticalAlignment::Middle;
+        label.verticalAlignnment = VerticalAlignment::Center;
         label.MakeInternal(this);
     }
 
@@ -33,7 +33,7 @@ namespace FWE::MarionetteUI
     {
         label.topLevel = false;
         label.horizontalAlignment = HorizontalAlignment::Center;
-        label.verticalAlignnment = VerticalAlignment::Middle;
+        label.verticalAlignnment = VerticalAlignment::Center;
         label.MakeInternal(this);
     }
 

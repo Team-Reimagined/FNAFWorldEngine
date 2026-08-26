@@ -21,8 +21,8 @@ int main() {
 
     FWE::Renderer::Image img = imgLoader->LoadImage("resources/Background.png");
 
-    FWE::MarionetteUI::Panel panel({0, 0}, {1, 1}, img, false, FWE::MarionetteUI::FullHorizontal, FWE::MarionetteUI::FullVertical);
-    FWE::MarionetteUI::TextInput input({0, 0}, {150, 85}, font, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Middle, 0xA000FFFF);
+    FWE::MarionetteUI::Panel panel({0, 0}, {1, 1}, img, false, FWE::MarionetteUI::HorizontalAlignment::Full, FWE::MarionetteUI::VerticalAlignment::Full);
+    FWE::MarionetteUI::TextInput input({0, 0}, {150, 85}, font, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Center, 0xA000FFFF);
 
     uiManager->AddUIElementToTree(&panel);
     uiManager->AddUIElementToTree(&input);

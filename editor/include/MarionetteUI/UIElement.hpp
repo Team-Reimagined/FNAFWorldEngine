@@ -5,20 +5,20 @@
 
 namespace FWE::MarionetteUI
 {
-    enum HorizontalAlignment
+    enum class HorizontalAlignment
     {
         Left,
         Center,
         Right,
-        FullHorizontal
+        Full
     };
 
-    enum VerticalAlignment
+    enum class VerticalAlignment
     {
         Top,
-        Middle,
+        Center,
         Bottom,
-        FullVertical
+        Full
     };
 
     class UIElement
@@ -42,8 +42,8 @@ namespace FWE::MarionetteUI
         glm::vec2 size = {1, 1};
         bool visible = true;
         bool blockMouse = true;
-        HorizontalAlignment horizontalAlignment = Left;
-        VerticalAlignment verticalAlignnment = Top;
+        HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
+        VerticalAlignment verticalAlignnment = VerticalAlignment::Top;
         bool topLevel = true;
     private:
         UIElement *parent = nullptr;

@@ -5,8 +5,8 @@
 namespace FWE::MarionetteUI
 {
     TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
-    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
-    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     panel(position, size, atlas, tile, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {
@@ -17,8 +17,8 @@ namespace FWE::MarionetteUI
     }
 
     TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
-    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
-    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     panel(position, size, image, tile, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {
@@ -29,8 +29,8 @@ namespace FWE::MarionetteUI
     }
 
     TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
-    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
-    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Middle), 
+    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     panel(position, size, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {

@@ -88,7 +88,7 @@ namespace FWE::MarionetteUI
 
         switch (horizontalAlignment)
         {
-        case Left:
+        case HorizontalAlignment::Left:
             if(topLevel)
             {
                 offset.x = size.x / 2.;
@@ -98,8 +98,8 @@ namespace FWE::MarionetteUI
                 offset.x = GetParent()->GetAlignmentOffset().x - GetParent()->size.x / 2. + size.x / 2.;
             }
             break;
-        case Center:
-        case FullHorizontal:
+        case HorizontalAlignment::Center:
+        case HorizontalAlignment::Full:
         {
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowWidth;
@@ -114,7 +114,7 @@ namespace FWE::MarionetteUI
             }
             break;
         }
-        case Right:
+        case HorizontalAlignment::Right:
         {
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowWidth;
@@ -135,7 +135,7 @@ namespace FWE::MarionetteUI
 
         switch (verticalAlignnment)
         {
-        case Top:
+        case VerticalAlignment::Top:
             if(topLevel)
             {
                 offset.y = size.y / 2.;
@@ -145,8 +145,8 @@ namespace FWE::MarionetteUI
                 offset.y = GetParent()->GetAlignmentOffset().y - GetParent()->size.y / 2. + size.y / 2.;
             }
             break;
-        case Middle:
-        case FullVertical:
+        case VerticalAlignment::Center:
+        case VerticalAlignment::Full:
         {
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowHeight;
@@ -161,7 +161,7 @@ namespace FWE::MarionetteUI
             }
             break;
         }
-        case Bottom:
+        case VerticalAlignment::Bottom:
         {
             SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
             int windowHeight;
