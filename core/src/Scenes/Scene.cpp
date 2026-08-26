@@ -2,8 +2,6 @@
 #include "External/json.hpp"
 #include <fstream>
 #include "Nodes/NodeDatabase.hpp"
-#include "Types/Atlas.hpp"
-#include "ResourceLoader/ImageLoader.hpp"
 
 namespace FWE::Scenes
 {
@@ -17,54 +15,7 @@ namespace FWE::Scenes
             FWE::Nodes::Node *node = database->CreateNode(type.c_str());
             for(auto [str, var] : node->registeredVariables)
             {
-                switch (var.type)
-                {
-                case FWE::Nodes::Types::Int:
-                {
-                    int value = sceneData.at("Children")[i].at(str);
-                    *(int *)var.variable = value;
-                    break;
-                }
-                case FWE::Nodes::Types::Float:
-                {
-                    float value = sceneData.at("Children")[i].at(str);
-                    *(float *)var.variable = value;
-                    break;
-                }
-                case FWE::Nodes::Types::Bool:
-                {
-                    bool value = sceneData.at("Children")[i].at(str);
-                    *(bool *)var.variable = value;
-                    break;
-                }
-                case FWE::Nodes::Types::String:
-                {
-                    std::string value = sceneData.at("Children")[i].at(str);
-                    *(std::string *)var.variable = value;
-                    break;
-                }
-                case FWE::Nodes::Types::Vector2:
-                {
-                    glm::vec2 value;
-                    value.x = sceneData.at("Children")[i].at(str)[0];
-                    value.y = sceneData.at("Children")[i].at(str)[1];
-                    *(glm::vec2 *)var.variable = value;
-                    break;
-                }
-                case FWE::Nodes::Types::Atlas:
-                {
-                    Types::Atlas value;
-                    ResourceLoader::ImageLoader *loader = ResourceLoader::ImageLoader::GetInstance();
-                    std::string filePath = sceneData.at("Children")[i].at(str)[0];
-                    value.img = loader->LoadImage(filePath.c_str());
-                    value.x = sceneData.at("Children")[i].at(str)[1];
-                    value.y = sceneData.at("Children")[i].at(str)[2];
-                    value.width = sceneData.at("Children")[i].at(str)[3];
-                    value.height = sceneData.at("Children")[i].at(str)[4];
-                    *(Types::Atlas *)var.variable = value;
-                    break;
-                }
-                }
+                var.SetVariable(sceneData.at("Children")[i].at(str));
             }
             parent->AddChild(node);
             LoadChildren(sceneData.at("Children")[i], node);

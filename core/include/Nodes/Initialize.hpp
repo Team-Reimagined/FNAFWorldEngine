@@ -7,7 +7,7 @@
 
 namespace FWE::Nodes
 {
-    void Initalize()
+    inline void Initalize()
     {
         NodeDatabase *database = NodeDatabase::GetInstance();
         database->Register<Node>("Node");

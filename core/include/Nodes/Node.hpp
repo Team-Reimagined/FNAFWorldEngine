@@ -4,25 +4,10 @@
 #include <unordered_map>
 #include <vector>
 #include <glm/glm.hpp>
+#include "RegisteredVariable.hpp"
 
 namespace FWE::Nodes
 {
-    enum Types
-    {
-        Int,
-        Float,
-        Bool,
-        String,
-        Vector2,
-        Atlas
-    };
-
-    struct RegisteredVariable
-    {
-        Types type;
-        void *variable;
-    };
-
     class Node
     {
     public:
