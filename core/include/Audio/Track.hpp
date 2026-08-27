@@ -8,7 +8,7 @@ namespace FWE::Audio {
         Track();
         Track(const Track& track);
         ~Track();
-        void Play();
+        void Play(bool loop = false);
 
         void SetAudio(MIX_Audio* audio);
         void SetVolume(float volume);

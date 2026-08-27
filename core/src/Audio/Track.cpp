@@ -17,9 +17,13 @@ namespace FWE::Audio {
         MIX_DestroyTrack(this->mixerTrack);
     }
 
-    void Track::Play() {
+    void Track::Play(bool loop) {
+        if(this->mixerTrack == nullptr){
+            return;
+        }
         MIX_SetTrackAudio(this->mixerTrack, this->audio);
         MIX_PlayTrack(this->mixerTrack, 0);
+        MIX_SetTrackLoops(this->mixerTrack, -1 * loop);
     }
 
     void Track::SetAudio(MIX_Audio* audio) {

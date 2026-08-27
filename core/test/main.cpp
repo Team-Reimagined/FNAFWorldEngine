@@ -24,9 +24,13 @@ int main() {
 
     audioManager->Init();
 
-    FWE::Audio::Track track = audioLoader->LoadAudio("resources/PartyFavorraspyPart_AC01__3.wav");
-    track.SetVolume(.25);
-    track.Play();
+    FWE::Audio::Track honk = audioLoader->LoadAudio("resources/PartyFavorraspyPart_AC01__3.wav");
+    honk.SetVolume(.25);
+    honk.Play();
+
+    FWE::Audio::Track bgm = audioLoader->LoadAudio("resources/Title screen theme - One for the road draft1.wav");
+    bgm.SetVolume(.25);
+    bgm.Play(true);
 
     FWE::Scenes::SceneManager *sceneManager = FWE::Scenes::SceneManager::GetInstance();
     sceneManager->LoadScene("resources/TestScene.scene"); 
