@@ -2,7 +2,6 @@
 
 #include "Scene.hpp"
 #include <functional>
-#include <vector>
 #include <string>
 
 namespace FWE::Scenes
@@ -21,7 +20,6 @@ namespace FWE::Scenes
         std::function<void()> loadQueuedScene;
         std::string scenePath = "";
         bool sceneChanged = false;
-        Scene *currentScene = nullptr;
-        
+        Scene currentScene;
     };
 }

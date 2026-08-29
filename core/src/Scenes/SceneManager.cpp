@@ -13,29 +13,25 @@ namespace FWE::Scenes
         scenePath = path;
         loadQueuedScene = [=, this]()
         {
-            currentScene = new Scene(scenePath.c_str());
+            currentScene.Load(scenePath.c_str());
         };
         sceneChanged = true;
     }
 
     Scene *SceneManager::GetCurrentScene()
     {
-        return currentScene;
+        return &currentScene;
     }
 
     void SceneManager::QueueSceneUnload()
     {
         sceneChanged = true;
-        currentScene = nullptr;
+        loadQueuedScene = [](){};
     }
 
     void SceneManager::UnloadCurrentScene()
     {
-        if(currentScene != nullptr)
-        {
-            delete currentScene;
-            currentScene = nullptr;
-        }
+        currentScene.Unload();
     }
     
     bool SceneManager::Update()
@@ -46,13 +42,13 @@ namespace FWE::Scenes
             loadQueuedScene();
             sceneChanged = false;
         }
-        if(currentScene == nullptr)
+        if(!currentScene.IsLoaded())
         {
             return false;
         }
 
-        currentScene->Update();
-        currentScene->Draw();
+        currentScene.Update();
+        currentScene.Draw();
 
         return true;
     }

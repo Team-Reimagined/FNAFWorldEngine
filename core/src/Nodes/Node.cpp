@@ -12,12 +12,15 @@ namespace FWE::Nodes
 
     Node::~Node()
     {
-        for(int i = 0; i < parent->GetChildrenCount(); i++)
+        if(parent != nullptr)
         {
-            if(parent->GetChild(i) == this)
+            for(int i = 0; i < parent->GetChildrenCount(); i++)
             {
-                parent->RemoveChild(i);
-                break;
+                if(parent->GetChild(i) == this)
+                {
+                    parent->RemoveChild(i);
+                    break;
+                }
             }
         }
     }

@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Nodes/Node.hpp"
-#include <vector>
-#include <memory>
-#include <string>
 
 namespace FWE::Scenes
 {
@@ -12,12 +9,17 @@ namespace FWE::Scenes
     public:
         void Update();
         void Draw();
+        
+        void Load(const char *scenePath);
+        void Unload();
+
+        bool IsLoaded();
 
         Nodes::Node *GetRoot();
 
-        Scene(const char *scenePath);
         ~Scene();
     private:
-        Nodes::Node *root;
+        Nodes::Node root;
+        bool loaded = false;
     };
 }

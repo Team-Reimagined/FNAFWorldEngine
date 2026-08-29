@@ -22,15 +22,19 @@ namespace FWE::Scenes
         }
     }
 
-    Scene::Scene(const char *scenePath)
+    void Scene::Load(const char *scenePath)
     {
+        if(loaded)
+        {
+            return;
+        }
         FWE::Nodes::NodeDatabase *database = FWE::Nodes::NodeDatabase::GetInstance();
         std::ifstream sceneFile(scenePath);
         nlohmann::json sceneData = nlohmann::json::parse(sceneFile);
-        root = database->CreateNode("Node");
-        LoadChildren(sceneData.at("Root"), root);
+        LoadChildren(sceneData.at("Root"), &root);
+        loaded = true;
     }
-
+    
     void DestroyRecursive(Nodes::Node *node)
     {
         for(int i = 0; i < node->GetChildrenCount(); i++)
@@ -40,14 +44,31 @@ namespace FWE::Scenes
         delete node;
     }
 
+    void Scene::Unload()
+    {
+        if(loaded)
+        {
+            for(int i = 0; i < root.GetChildrenCount(); i++)
+            {
+                DestroyRecursive(root.GetChild(i));
+            }
+            loaded = false;
+        }
+    }
+
+    bool Scene::IsLoaded()
+    {
+        return loaded;
+    }
+
     Scene::~Scene()
     {
-        DestroyRecursive(root);
+        Unload();
     }
 
     Nodes::Node *Scene::GetRoot()
     {
-        return root;
+        return &root;
     }
 
     void UpdateRecursive(FWE::Nodes::Node *node)
@@ -61,7 +82,7 @@ namespace FWE::Scenes
 
     void Scene::Update()
     {
-        UpdateRecursive(root);
+        UpdateRecursive(&root);
     }
 
     void DrawRecursive(FWE::Nodes::Node *node)
@@ -78,6 +99,6 @@ namespace FWE::Scenes
 
     void Scene::Draw()
     {
-        DrawRecursive(root);  
+        DrawRecursive(&root);  
     }
 }
