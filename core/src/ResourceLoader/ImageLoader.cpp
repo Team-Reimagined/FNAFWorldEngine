@@ -6,11 +6,6 @@
 
 namespace FWE::ResourceLoader
 {
-    ImageLoader::~ImageLoader()
-    {
-        imageData.clear();
-    }
-
     Renderer::Image ImageLoader::LoadImage(const char *filePath)
     {
         if(imageData.find(filePath) != imageData.end())
@@ -20,11 +15,11 @@ namespace FWE::ResourceLoader
         else
         {
             ImageResource resource;
-            resource.data = stbi_load(filePath, (int *)&resource.image.width, (int *)&resource.image.height, &resource.image.n, 4);
+            resource.data = stbi_load(filePath, (int *)&resource.image.width, (int *)&resource.image.height, &resource.image.depth, 4);
             if(resource.data != nullptr)
             {
                 Renderer::Renderer *renderer = Renderer::Renderer::GetInstance();
-                resource.image.id = renderer->AddImage(resource);
+                resource.image.allocatedImg = renderer->AddImage(resource);
                 stbi_image_free(resource.data);
                 imageData.insert({filePath, resource.image});
             }
@@ -40,5 +35,15 @@ namespace FWE::ResourceLoader
     {
         static ImageLoader loader;
         return &loader;
+    }
+
+    void ImageLoader::Clear()
+    {
+        
+        for(auto [str, var] : imageData)
+        {
+            Renderer::Renderer::GetInstance()->RemoveImage(var);
+        }
+        imageData.clear();
     }
 }

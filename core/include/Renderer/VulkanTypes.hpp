@@ -44,11 +44,11 @@ struct GPUDrawPushConstants
     FWE::Types::Color color;
 };
 
-#define VK_CHECK(x)                                                     \
-    do {                                                                \
-        VkResult err = x;                                               \
-        if (err) {                                                      \
-            FWE::Util::Logging::error("Detected Vulkan error: {}", string_VkResult(err)); \
-            abort();                                                    \
-        }                                                               \
-    } while (0)
+inline void VK_CHECK(VkResult result)
+{
+    if (result)
+    {                                                      
+        FWE::Util::Logging::error("Detected Vulkan error: {}", string_VkResult(result));
+        abort();                                                    
+    }   
+}

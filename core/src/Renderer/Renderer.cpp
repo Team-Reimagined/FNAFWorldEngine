@@ -1,4 +1,5 @@
 #include "Renderer/Renderer.hpp"
+#include "ResourceLoader/ImageLoader.hpp"
 #include "glm/ext/vector_float2.hpp"
 #include <SDL3/SDL_vulkan.h>
 
@@ -11,12 +12,13 @@ namespace FWE::Renderer
 
     void Renderer::Shutdown()
     {
+        ResourceLoader::ImageLoader::GetInstance()->Clear();
         vulkan.Shutdown();
     }
 
     void Renderer::Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount, Types::Color color)
     {
-        if(atlas.img.id != -1)
+        if(atlas.img.allocatedImg.image != nullptr)
         {
             vulkan.Draw(atlas, position, scale, tileCount, color);
         }
@@ -42,7 +44,7 @@ namespace FWE::Renderer
         return &instance;
     }
 
-    int Renderer::AddImage(const ResourceLoader::ImageResource &image)
+    AllocatedImage Renderer::AddImage(const ResourceLoader::ImageResource &image)
     {
         return vulkan.AddImage(image);
     }

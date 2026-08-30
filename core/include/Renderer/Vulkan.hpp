@@ -9,15 +9,6 @@
 
 namespace FWE::Renderer::Vulkan
 {
-    struct AllocatedImage
-    {
-        VkImage image = nullptr;
-        VkImageView imageView = nullptr;
-        VmaAllocation allocation = nullptr;
-        VkExtent3D imageExtent;
-        VkFormat imageFormat;  
-    };
-
     struct DeletionQueue
     {
         std::deque<std::function<void()>> deletors;
@@ -60,7 +51,7 @@ namespace FWE::Renderer::Vulkan
         void Render();
         void Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount = {1, 1}, FWE::Types::Color color = 0xFFFFFFFF);
         void Draw(glm::vec2 position, glm::vec2 size, FWE::Types::Color color = 0xFFFFFFFF);
-        int AddImage(const ResourceLoader::ImageResource &image);
+        AllocatedImage AddImage(const ResourceLoader::ImageResource &image);
         void RemoveImage(const Image &image);
         SDL_Window *GetWindow();
         static Vulkan *GetInstance();
@@ -146,8 +137,6 @@ namespace FWE::Renderer::Vulkan
         GPUMeshBuffers rectangle;
 
         AllocatedImage whiteImage;
-        std::vector<AllocatedImage> images;
-        std::vector<uint32_t> freeImageIndexes;
 
         VkSampler defaultSamplerLinear;
         VkSampler defaultSamplerNearest;

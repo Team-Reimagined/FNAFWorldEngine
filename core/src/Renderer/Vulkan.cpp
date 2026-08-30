@@ -649,7 +649,7 @@ namespace FWE::Renderer::Vulkan
         VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
         {
             DescriptorWriter writer;
-            writer.WriteImage(0, images[atlas.img.id].imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+            writer.WriteImage(0, atlas.img.allocatedImg.imageView, defaultSamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 
             writer.UpdateSet(device, imageSet);
         }
@@ -812,12 +812,6 @@ namespace FWE::Renderer::Vulkan
                 frames[i].deletionQueue.Flush();
             }
 
-            for(auto &image : images)
-            {
-                DestroyImage(image);
-            }
-            images.clear();
-
             vkDestroyImageView(device, drawImage.imageView, nullptr);
             vmaDestroyImage(allocator, drawImage.image, drawImage.allocation);
             mainDeletionQueue.Flush();
@@ -906,27 +900,14 @@ namespace FWE::Renderer::Vulkan
         vmaDestroyImage(allocator, img.image, img.allocation);
     }
 
-    int Vulkan::AddImage(const ResourceLoader::ImageResource &image)
+    AllocatedImage Vulkan::AddImage(const ResourceLoader::ImageResource &image)
     {
-        uint32_t imageId = images.size();
-        if(freeImageIndexes.size() > 0)
-        {
-            imageId = freeImageIndexes.back();
-            freeImageIndexes.pop_back();
-            images[imageId] = CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
-            return imageId;
-        }
-
-        images.push_back(CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT));
-        return imageId;
+        return CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
     }
 
     void Vulkan::RemoveImage(const Image &image)
     {
-        DestroyImage(images[image.id]);
-        freeImageIndexes.push_back(image.id);
-        std::sort(freeImageIndexes.begin(), freeImageIndexes.end(), std::greater<int>());
-        images[image.id] = {};
+        DestroyImage(image.allocatedImg);
     }
 
     SDL_Window *Vulkan::GetWindow()

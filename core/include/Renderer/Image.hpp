@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Renderer/AllocatedImage.hpp"
 #include <cstdint>
-#include <string>
 
 namespace FWE::Renderer
 {
@@ -9,7 +9,7 @@ namespace FWE::Renderer
     {
         uint32_t width;
         uint32_t height;
-        int n;
-        int id = -1;
+        int depth;
+        AllocatedImage allocatedImg;
     };
 };

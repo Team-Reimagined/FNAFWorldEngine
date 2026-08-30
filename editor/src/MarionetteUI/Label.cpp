@@ -47,7 +47,7 @@ namespace FWE::MarionetteUI
         SDL_Surface *surf = SDL_ConvertSurface(surfArgb, SDL_PIXELFORMAT_RGBA32);
         SDL_DestroySurface(surfArgb);
         Renderer::Renderer *renderer = Renderer::Renderer::GetInstance();
-        if(texture.img.id != -1)
+        if(texture.img.allocatedImg.image != nullptr)
         {
             renderer->RemoveImage(texture.img);
         }
@@ -63,7 +63,7 @@ namespace FWE::MarionetteUI
         size.x = texture.width;
         size.y = texture.height;
 
-        texture.img.id = renderer->AddImage({surf->pixels, texture.img});
+        texture.img.allocatedImg = renderer->AddImage({surf->pixels, texture.img});
         SDL_DestroySurface(surf);
     }
 

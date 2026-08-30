@@ -26,7 +26,7 @@ namespace FWE::MarionetteUI
 
     void Panel::Draw()
     {
-        if(atlas.img.id != -1)
+        if(atlas.img.allocatedImg.image != nullptr)
         {
             glm::vec2 offset = GetAlignmentOffset();
             glm::vec2 scale = {size.x / atlas.img.width, size.y / atlas.img.height};

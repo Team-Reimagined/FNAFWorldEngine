@@ -6,7 +6,7 @@ namespace FWE::ResourceLoader
 {
     AudioLoader::~AudioLoader()
     {
-        tracks.clear();
+        Clear();
     }
 
     Audio::Track AudioLoader::LoadAudio(const char *filePath)
@@ -39,5 +39,10 @@ namespace FWE::ResourceLoader
     {
         static AudioLoader loader;
         return &loader;
+    }
+
+    void AudioLoader::Clear()
+    {
+        tracks.clear();
     }
 }
