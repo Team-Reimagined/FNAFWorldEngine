@@ -26,13 +26,18 @@ namespace FWE::Scenes
     {
         if(loaded)
         {
-            return;
+            Unload();
         }
         FWE::Nodes::NodeDatabase *database = FWE::Nodes::NodeDatabase::GetInstance();
         std::ifstream sceneFile(scenePath);
         nlohmann::json sceneData = nlohmann::json::parse(sceneFile);
         LoadChildren(sceneData.at("Root"), &root);
         loaded = true;
+    }
+
+    Scene::Scene(const char *scenePath)
+    {
+        Load(scenePath);
     }
     
     void DestroyRecursive(Nodes::Node *node)
@@ -51,6 +56,10 @@ namespace FWE::Scenes
             for(int i = 0; i < root.GetChildrenCount(); i++)
             {
                 DestroyRecursive(root.GetChild(i));
+            }
+            while(root.GetChildrenCount())
+            {
+                root.RemoveChild(root.GetChildrenCount() - 1);
             }
             loaded = false;
         }

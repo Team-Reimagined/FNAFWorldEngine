@@ -17,6 +17,8 @@ namespace FWE::Scenes
 
         Nodes::Node *GetRoot();
 
+        Scene() {}
+        Scene(const char *scenePath);
         ~Scene();
     private:
         Nodes::Node root;

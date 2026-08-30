@@ -11,11 +11,11 @@ namespace FWE::Scenes
     void SceneManager::LoadScene(const char *path)
     {
         scenePath = path;
-        loadQueuedScene = [=, this]()
+        queuedFunction = [=, this]()
         {
             currentScene.Load(scenePath.c_str());
         };
-        sceneChanged = true;
+        functionQueued = true;
     }
 
     Scene *SceneManager::GetCurrentScene()
@@ -23,25 +23,23 @@ namespace FWE::Scenes
         return &currentScene;
     }
 
-    void SceneManager::QueueSceneUnload()
+    void SceneManager::UnloadScene()
     {
-        sceneChanged = true;
-        loadQueuedScene = [](){};
-    }
-
-    void SceneManager::UnloadCurrentScene()
-    {
-        currentScene.Unload();
+        queuedFunction = [=, this]()
+        {
+            currentScene.Unload();
+        };
+        functionQueued = true;
     }
     
     bool SceneManager::Update()
     {
-        if(sceneChanged)
+        if(functionQueued)
         {
-            UnloadCurrentScene();
-            loadQueuedScene();
-            sceneChanged = false;
+            queuedFunction();
+            functionQueued = false;
         }
+
         if(!currentScene.IsLoaded())
         {
             return false;

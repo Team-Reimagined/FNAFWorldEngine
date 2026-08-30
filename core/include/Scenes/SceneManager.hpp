@@ -10,16 +10,14 @@ namespace FWE::Scenes
     {
     public:
         void LoadScene(const char *path);
-        void QueueSceneUnload();
+        void UnloadScene();
         bool Update();
         static SceneManager *GetInstance();
         Scene *GetCurrentScene();
     private:
-        void UnloadCurrentScene();
-    private:
-        std::function<void()> loadQueuedScene;
+        std::function<void()> queuedFunction;
         std::string scenePath = "";
-        bool sceneChanged = false;
+        bool functionQueued = false;
         Scene currentScene;
     };
 }
