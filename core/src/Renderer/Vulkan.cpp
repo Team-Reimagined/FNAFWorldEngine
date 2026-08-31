@@ -539,7 +539,8 @@ namespace FWE::Renderer::Vulkan
 
         if(resizeRequested)
         {
-            return;
+            StartFrame();
+            //return;
         }
 
         VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
@@ -618,7 +619,8 @@ namespace FWE::Renderer::Vulkan
 
         if(resizeRequested)
         {
-            return;
+            StartFrame();
+            //return;
         }
 
         VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
@@ -702,7 +704,8 @@ namespace FWE::Renderer::Vulkan
 
         if(resizeRequested)
         {
-            return;
+            StartFrame();
+            //return;
         }
 
         Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);

@@ -39,7 +39,6 @@ namespace FWE::ResourceLoader
 
     void ImageLoader::Clear()
     {
-        
         for(auto [str, var] : imageData)
         {
             Renderer::Renderer::GetInstance()->RemoveImage(var);
