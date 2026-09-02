@@ -12,7 +12,6 @@ namespace FWE::Renderer
 
     void Renderer::Shutdown()
     {
-        ResourceLoader::ImageLoader::GetInstance()->Clear();
         vulkan.Shutdown();
     }
 

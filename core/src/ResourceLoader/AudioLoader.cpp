@@ -4,11 +4,6 @@
 
 namespace FWE::ResourceLoader
 {
-    AudioLoader::~AudioLoader()
-    {
-        Clear();
-    }
-
     Audio::Track AudioLoader::LoadAudio(const char *filePath)
     {
         Audio::AudioManager *manager = Audio::AudioManager::GetInstance();
@@ -39,10 +34,5 @@ namespace FWE::ResourceLoader
     {
         static AudioLoader loader;
         return &loader;
-    }
-
-    void AudioLoader::Clear()
-    {
-        tracks.clear();
     }
 }

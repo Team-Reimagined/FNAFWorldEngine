@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 
+#include "Renderer/AllocatedImage.hpp"
 #include "Renderer/VulkanInitalizers.hpp"
 #include "Renderer/VulkanTypes.hpp"
 #include "Renderer/VulkanImages.hpp"
@@ -35,6 +36,10 @@ namespace FWE::Renderer::Vulkan
 
     void Vulkan::Init(bool fixedResolution, bool fullscreen)
     {
+        if(initalized)
+        {
+            return;
+        }
         SDL_Init(SDL_INIT_VIDEO);
         window = SDL_CreateWindow(windowName, windowExtent.width, windowExtent.height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_FULLSCREEN * fullscreen);
         this->fixedResolution = fixedResolution;
@@ -815,6 +820,12 @@ namespace FWE::Renderer::Vulkan
                 frames[i].deletionQueue.Flush();
             }
 
+            for(const AllocatedImage &image : images)
+            {
+                DestroyImage(image);
+            }
+            images.clear();
+
             vkDestroyImageView(device, drawImage.imageView, nullptr);
             vmaDestroyImage(allocator, drawImage.image, drawImage.allocation);
             mainDeletionQueue.Flush();
@@ -828,6 +839,8 @@ namespace FWE::Renderer::Vulkan
             vkDestroyInstance(instance, nullptr);
 
             SDL_DestroyWindow(window);
+
+            initalized = false;
         }
     }
 
@@ -905,11 +918,22 @@ namespace FWE::Renderer::Vulkan
 
     AllocatedImage Vulkan::AddImage(const ResourceLoader::ImageResource &image)
     {
-        return CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+        images.push_back(CreateImage(image.data, (VkExtent3D){image.image.width, image.image.height, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT));
+        return images.back();
     }
 
     void Vulkan::RemoveImage(const Image &image)
     {
+        for(unsigned int i = 0; i < images.size(); i++)
+        {
+            if(image.allocatedImg.image == images[i].image)
+            {
+                std::swap(images[images.size() - 1], images[i]);
+                images.pop_back();
+                break;
+            }
+        }
+        
         DestroyImage(image.allocatedImg);
     }
 

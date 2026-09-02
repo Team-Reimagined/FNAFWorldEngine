@@ -36,13 +36,4 @@ namespace FWE::ResourceLoader
         static ImageLoader loader;
         return &loader;
     }
-
-    void ImageLoader::Clear()
-    {
-        for(auto [str, var] : imageData)
-        {
-            Renderer::Renderer::GetInstance()->RemoveImage(var);
-        }
-        imageData.clear();
-    }
 }

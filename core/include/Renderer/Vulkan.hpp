@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Renderer/AllocatedImage.hpp"
 #include "Types/Color.hpp"
 #include "VulkanTypes.hpp"
 #include <SDL3/SDL.h>
+#include <vector>
 #include "VulkanDescriptors.hpp"
 #include "Types/Atlas.hpp"
 #include "ResourceLoader/ImageLoader.hpp"
@@ -146,6 +148,8 @@ namespace FWE::Renderer::Vulkan
         VkCommandBuffer cmd;
 
         uint32_t swapchainImageIndex;
+
+        std::vector<AllocatedImage> images;
 
         bool resizeRequested = false;
 

@@ -1,6 +1,7 @@
 #include "Scenes/Scene.hpp"
 #include "External/json.hpp"
 #include <fstream>
+#include "Nodes/Node.hpp"
 #include "Nodes/NodeDatabase.hpp"
 
 namespace FWE::Scenes
@@ -57,10 +58,7 @@ namespace FWE::Scenes
             {
                 DestroyRecursive(root.GetChild(i));
             }
-            while(root.GetChildrenCount())
-            {
-                root.RemoveChild(root.GetChildrenCount() - 1);
-            }
+            root = Nodes::Node();
             loaded = false;
         }
     }

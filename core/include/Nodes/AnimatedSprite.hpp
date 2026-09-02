@@ -2,7 +2,6 @@
 
 #include "Node.hpp"
 #include "Types/Atlas.hpp"
-#include <vector>
 #include <chrono>
 
 namespace FWE::Nodes

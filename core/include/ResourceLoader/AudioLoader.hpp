@@ -10,10 +10,8 @@ namespace FWE::ResourceLoader
     class AudioLoader
     {
     public:
-        ~AudioLoader();
         static AudioLoader *GetInstance();
         Audio::Track LoadAudio(const char *filePath);
-        void Clear();
     private:
         std::unordered_map<std::string, MIX_Audio *> tracks;
     };
