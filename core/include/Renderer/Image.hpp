@@ -9,7 +9,7 @@ namespace FWE::Renderer
     {
         uint32_t width;
         uint32_t height;
-        int depth;
+        int channels;
         AllocatedImage allocatedImg;
     };
 };

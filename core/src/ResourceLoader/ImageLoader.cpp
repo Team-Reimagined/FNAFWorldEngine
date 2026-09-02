@@ -15,7 +15,7 @@ namespace FWE::ResourceLoader
         else
         {
             ImageResource resource;
-            resource.data = stbi_load(filePath, (int *)&resource.image.width, (int *)&resource.image.height, &resource.image.depth, 4);
+            resource.data = stbi_load(filePath, (int *)&resource.image.width, (int *)&resource.image.height, &resource.image.channels, 4);
             if(resource.data != nullptr)
             {
                 Renderer::Renderer *renderer = Renderer::Renderer::GetInstance();
