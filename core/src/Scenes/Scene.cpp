@@ -32,6 +32,7 @@ namespace FWE::Scenes
         FWE::Nodes::NodeDatabase *database = FWE::Nodes::NodeDatabase::GetInstance();
         std::ifstream sceneFile(scenePath);
         nlohmann::json sceneData = nlohmann::json::parse(sceneFile);
+        name = sceneData.at("SceneName");
         LoadChildren(sceneData.at("Root"), &root);
         loaded = true;
     }
@@ -107,5 +108,10 @@ namespace FWE::Scenes
     void Scene::Draw()
     {
         DrawRecursive(&root);  
+    }
+
+    const char *Scene::GetName()
+    {
+        return name.c_str();
     }
 }

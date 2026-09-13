@@ -18,6 +18,7 @@ namespace FWE::Renderer
         void Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount = {1, 1}, Types::Color color = 0xFFFFFFFF);
         void Draw(glm::vec2 position, glm::vec2 size, Types::Color color = 0xFFFFFFFF);
         void Render();
+        void SetClearColor(Types::Color color = 0x000000FF);
         AllocatedImage AddImage(const ResourceLoader::ImageResource &image);
         void RemoveImage(const Image &image);
         SDL_Window *GetWindow();

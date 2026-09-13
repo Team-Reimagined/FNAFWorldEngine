@@ -1,9 +1,9 @@
-#include "MarionetteUI/Panel.hpp"
-#include "MarionetteUI/UIElement.hpp"
 #include "MarionetteUI/UIManager.hpp"
+#include "Nodes/Initialize.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Input/InputManager.hpp"
-#include "MarionetteUI/TextInput.hpp"
+#include "SceneTree.hpp"
+#include "Scenes/Scene.hpp"
 
 int main() {
     FWE::Renderer::Renderer *renderer = FWE::Renderer::Renderer::GetInstance();
@@ -15,17 +15,15 @@ int main() {
     const bool fullscreen = false;
 
     renderer->Init(fixedResolution, fullscreen);
+    renderer->SetClearColor(0x1A1A1AFF);
     uiManager->Init();
 
-    FWE::MarionetteUI::Font font = {uiManager->LoadFont("resources/fonts/fnaf_world_font.ttf"), 32, {0, 255, 255, 255}};
+    FWE::Nodes::Initalize();
 
-    FWE::Renderer::Image img = imgLoader->LoadImage("resources/Background.png");
-
-    FWE::MarionetteUI::Panel panel({0, 0}, {1, 1}, img, false, FWE::MarionetteUI::HorizontalAlignment::Full, FWE::MarionetteUI::VerticalAlignment::Full);
-    FWE::MarionetteUI::TextInput input({0, 0}, {150, 85}, font, "Temp", FWE::MarionetteUI::HorizontalAlignment::Center, FWE::MarionetteUI::VerticalAlignment::Center, 0xA000FFFF);
-
-    uiManager->AddUIElementToTree(&panel);
-    uiManager->AddUIElementToTree(&input);
+    FWE::Scenes::Scene scene("resources/TestScene.scene");
+    FWE::Editor::SceneTree sceneTree;
+    uiManager->AddUIElementToTree(&sceneTree);
+    sceneTree.SetScene(&scene);
     
     bool running = true;
 

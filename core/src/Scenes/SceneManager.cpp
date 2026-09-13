@@ -50,4 +50,9 @@ namespace FWE::Scenes
 
         return true;
     }
+
+    const char *SceneManager::GetCurrentScenePath()
+    {
+        return scenePath.c_str();
+    }
 }

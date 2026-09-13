@@ -13,6 +13,7 @@ namespace FWE::MarionetteUI
         void Init();
         void Shutdown();
         TTF_Font *LoadFont(const char *filePath);
+        TTF_Font *GetDefaultFont();
         void AddUIElementToTree(UIElement *element);
         void Draw();
     private:
@@ -23,5 +24,6 @@ namespace FWE::MarionetteUI
         std::unordered_map<std::string, TTF_Font *> fonts;
         UIElement root;
         UIElement *selected;
+        TTF_Font *defaultFont;
     };
 }

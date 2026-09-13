@@ -12,10 +12,10 @@ namespace FWE::Scenes
         
         void Load(const char *scenePath);
         void Unload();
-
         bool IsLoaded();
 
         Nodes::Node *GetRoot();
+        const char *GetName();
 
         Scene() {}
         Scene(const char *scenePath);
@@ -23,5 +23,6 @@ namespace FWE::Scenes
     private:
         Nodes::Node root;
         bool loaded = false;
+        std::string name;
     };
 }

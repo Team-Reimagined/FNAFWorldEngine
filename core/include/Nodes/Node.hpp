@@ -21,7 +21,7 @@ namespace FWE::Nodes
         glm::vec2 GetGlobalScale();
         Node *GetParent();
         Node *GetChild(unsigned int index);
-        std::vector<Node *> &GetChildren();
+        const std::vector<Node *> &GetChildren();
         unsigned int GetChildrenCount();
         void RemoveChild(unsigned int index);
         void RemoveFromTree();

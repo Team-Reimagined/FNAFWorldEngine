@@ -523,7 +523,7 @@ namespace FWE::Renderer::Vulkan
             
         push_constants.worldMatrix = glm::mat4 {1.f};
         push_constants.vertexBuffer = rectangle.vertexBufferAddress;
-        push_constants.color = 0x000000FF;
+        push_constants.color = clearColor;
 
         vkCmdPushConstants(cmd, meshPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &push_constants);
         vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
@@ -940,5 +940,10 @@ namespace FWE::Renderer::Vulkan
     SDL_Window *Vulkan::GetWindow()
     {
         return window;
+    }
+
+    void Vulkan::SetClearColor(Types::Color color)
+    {
+        clearColor = color;
     }
 }

@@ -14,6 +14,7 @@ namespace FWE::Scenes
         bool Update();
         static SceneManager *GetInstance();
         Scene *GetCurrentScene();
+        const char *GetCurrentScenePath();
     private:
         std::function<void()> queuedFunction;
         std::string scenePath = "";

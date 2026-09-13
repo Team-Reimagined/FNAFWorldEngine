@@ -14,6 +14,7 @@ namespace FWE::MarionetteUI
         }
         TTF_Init();
         SDL_StartTextInput(Renderer::Renderer::GetInstance()->GetWindow());
+        defaultFont = LoadFont("resources/fonts/fnaf_world_font.ttf");
         Input::InputManager::GetInstance()->AddInputCallback([](const SDL_Event *event){UIManager::GetInstance()->ProccessInputEvent(event);});
         root.blockMouse = false;
         initalized = true;
@@ -124,5 +125,10 @@ namespace FWE::MarionetteUI
     void UIManager::Draw()
     {
         DrawRecursive(&root);  
+    }
+
+    TTF_Font *UIManager::GetDefaultFont()
+    {
+        return defaultFont;
     }
 }

@@ -89,7 +89,7 @@ namespace FWE::Nodes
         return children[index];
     }
 
-    std::vector<Node *> &Node::GetChildren()
+    const std::vector<Node *> &Node::GetChildren()
     {
         return children;
     }

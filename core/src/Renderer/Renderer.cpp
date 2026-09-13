@@ -1,5 +1,6 @@
 #include "Renderer/Renderer.hpp"
 #include "ResourceLoader/ImageLoader.hpp"
+#include "Types/Color.hpp"
 #include "glm/ext/vector_float2.hpp"
 #include <SDL3/SDL_vulkan.h>
 
@@ -35,6 +36,11 @@ namespace FWE::Renderer
         vulkan.Render();
         //SDL_RenderPresent(renderer);
         //SDL_RenderClear(renderer);
+    }
+
+    void Renderer::SetClearColor(Types::Color color)
+    {
+        vulkan.SetClearColor(color);
     }
 
     Renderer *Renderer::GetInstance()
