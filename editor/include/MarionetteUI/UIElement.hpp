@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SDL3/SDL_keycode.h"
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -27,7 +28,18 @@ namespace FWE::MarionetteUI
         UIElement() {};
         UIElement(glm::vec2 position, glm::vec2 size, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment);
         ~UIElement();
+
         virtual void Draw(){}
+
+        virtual void OnLeftClick(){}
+        virtual void OnRightClick(){}
+        virtual void OnDrag(glm::vec2 movement){}
+        virtual void OnLeftRelease(){}
+        virtual void OnRightRelease(){}
+
+        virtual void KeyPressed(SDL_Keycode key){}
+        virtual void TextInput(const char *text){}
+
         void AddChild(UIElement *element);
         UIElement *GetParent();
         UIElement *GetChild(unsigned int index);
@@ -35,7 +47,9 @@ namespace FWE::MarionetteUI
         unsigned int GetChildrenCount();
         void RemoveChild(unsigned int index);
         void RemoveFromTree();
+
         glm::vec2 GetAlignmentOffset();
+
         void MakeInternal(UIElement *parent);
     public:
         glm::vec2 position = {0, 0};

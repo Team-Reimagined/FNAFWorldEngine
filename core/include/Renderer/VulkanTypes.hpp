@@ -44,7 +44,7 @@ struct GPUDrawPushConstants
     FWE::Types::Color color;
 };
 
-inline void VK_CHECK(VkResult result)
+inline void VkCheck(VkResult result)
 {
     if (result)
     {                                                      

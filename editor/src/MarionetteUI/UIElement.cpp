@@ -87,6 +87,20 @@ namespace FWE::MarionetteUI
 
     glm::vec2 UIElement::GetAlignmentOffset()
     {
+        SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
+        int windowWidth;
+        int windowHeight;
+        SDL_GetWindowSizeInPixels(window, &windowWidth, &windowHeight);
+
+        if(horizontalAlignment == HorizontalAlignment::Full)
+        {
+            size.x = windowWidth;
+        }
+        if(verticalAlignnment == VerticalAlignment::Full)
+        {
+            size.y = windowHeight;
+        }
+
         glm::vec2 offset = {0, 0};
 
         switch (horizontalAlignment)
@@ -103,10 +117,6 @@ namespace FWE::MarionetteUI
             break;
         case HorizontalAlignment::Center:
         case HorizontalAlignment::Full:
-        {
-            SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
-            int windowWidth;
-            SDL_GetWindowSizeInPixels(window, &windowWidth, NULL);
             if(topLevel)
             {
                 offset.x = windowWidth / 2.;
@@ -116,12 +126,7 @@ namespace FWE::MarionetteUI
                 offset.x = GetParent()->GetAlignmentOffset().x;
             }
             break;
-        }
         case HorizontalAlignment::Right:
-        {
-            SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
-            int windowWidth;
-            SDL_GetWindowSizeInPixels(window, &windowWidth, NULL);
             if(topLevel)
             {
                 offset.x = windowWidth - size.x / 2.;
@@ -131,7 +136,6 @@ namespace FWE::MarionetteUI
                 offset.x = GetParent()->GetAlignmentOffset().x + GetParent()->size.x / 2. - size.x / 2.;;
             }
             break;
-        }
         default:
             break;
         }
@@ -150,10 +154,6 @@ namespace FWE::MarionetteUI
             break;
         case VerticalAlignment::Center:
         case VerticalAlignment::Full:
-        {
-            SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
-            int windowHeight;
-            SDL_GetWindowSizeInPixels(window, NULL, &windowHeight);
             if(topLevel)
             {
                 offset.y = windowHeight / 2.;
@@ -163,12 +163,7 @@ namespace FWE::MarionetteUI
                 offset.y = GetParent()->GetAlignmentOffset().y;
             }
             break;
-        }
         case VerticalAlignment::Bottom:
-        {
-            SDL_Window *window = Renderer::Renderer::GetInstance()->GetWindow();
-            int windowHeight;
-            SDL_GetWindowSizeInPixels(window, NULL, &windowHeight);
             if(topLevel)
             {
                 offset.y = windowHeight - size.y / 2.;
@@ -178,7 +173,6 @@ namespace FWE::MarionetteUI
                 offset.y = GetParent()->GetAlignmentOffset().y + GetParent()->size.y / 2 - size.y / 2.;
             }
             break;
-        }
         default:
             break;
         }

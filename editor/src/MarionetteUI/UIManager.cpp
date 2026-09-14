@@ -1,8 +1,9 @@
 #include "MarionetteUI/UIManager.hpp"
 #include "Input/InputManager.hpp"
-#include "MarionetteUI/Button.hpp"
-#include "MarionetteUI/TextInput.hpp"
+#include "MarionetteUI/UIElement.hpp"
 #include "Renderer/Renderer.hpp"
+#include "SDL3/SDL_events.h"
+#include "SDL3/SDL_mouse.h"
 
 namespace FWE::MarionetteUI
 {
@@ -56,22 +57,38 @@ namespace FWE::MarionetteUI
 
     void UIManager::ProccessInputEvent(const SDL_Event *event)
     {
-        if(event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_LEFT)
+        switch(event->type)
+        {
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
             float x, y;
             SDL_GetMouseState(&x, &y);
-            CheckElementClicked({x, y});
+            GetElementClicked({x, y});
+            if(selected != nullptr)
+            {
+                if(event->button.button == SDL_BUTTON_LEFT)
+                {
+                    selected->OnLeftClick();    
+                }
+                else if (event->button.button == SDL_BUTTON_RIGHT)
+                {
+                    selected->OnRightClick();
+                }
+            }
+            break;
         }
-        else if(IsElementType<TextInput>(selected))
-        {
-            if(event->type == SDL_EVENT_TEXT_INPUT)
+        case SDL_EVENT_TEXT_INPUT:
+            if(selected != nullptr)
             {
-                ((TextInput *)selected)->AddCharacter(event->text.text);
+                selected->TextInput(event->text.text);
             }
-            else if(event->type == SDL_EVENT_KEY_DOWN && event->key.key == SDLK_BACKSPACE)
+            break;
+        case SDL_EVENT_KEY_DOWN:
+            if(selected != nullptr)
             {
-                ((TextInput *)selected)->RemoveCharacter();
+                selected->KeyPressed(event->key.key);
             }
+            break;
         }
     }
 
@@ -95,14 +112,10 @@ namespace FWE::MarionetteUI
         }
     }
 
-    void UIManager::CheckElementClicked(glm::vec2 mousePos)
+    void UIManager::GetElementClicked(glm::vec2 mousePos)
     {
         selected = nullptr;
         CheckElementRecursive(mousePos, &selected, &root);
-        if(IsElementType<Button>(selected))
-        {
-            ((Button *)selected)->Pressed();
-        }
     }
 
     void UIManager::AddUIElementToTree(UIElement *element)

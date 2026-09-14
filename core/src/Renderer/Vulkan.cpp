@@ -11,6 +11,7 @@
 #include "Types/Color.hpp"
 
 #include <VkBootstrap.h>
+#include <cstddef>
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
@@ -126,7 +127,7 @@ namespace FWE::Renderer::Vulkan
 
         VkImageViewCreateInfo viewInfo = Utils::ImageViewCreateInfo(drawImage.imageFormat, drawImage.image, VK_IMAGE_ASPECT_COLOR_BIT);
 
-        VK_CHECK(vkCreateImageView(device, &viewInfo, nullptr, &drawImage.imageView));
+        VkCheck(vkCreateImageView(device, &viewInfo, nullptr, &drawImage.imageView));
     }
 
     void Vulkan::InitCommands()
@@ -139,18 +140,18 @@ namespace FWE::Renderer::Vulkan
 
         for(int i = 0; i < FRAME_OVERLAP; i++)
         {
-            VK_CHECK(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &frames[i].commandPool));
+            VkCheck(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &frames[i].commandPool));
 
             VkCommandBufferAllocateInfo cmdAllocInfo = Utils::CommandBufferAllocateInfo(frames[i].commandPool, 1);
 
-            VK_CHECK(vkAllocateCommandBuffers(device, &cmdAllocInfo, &frames[i].mainCommandBuffer));
+            VkCheck(vkAllocateCommandBuffers(device, &cmdAllocInfo, &frames[i].mainCommandBuffer));
         }
 
-        VK_CHECK(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &immCommandPool));
+        VkCheck(vkCreateCommandPool(device, &commandPoolInfo, nullptr, &immCommandPool));
 
         VkCommandBufferAllocateInfo cmdAllocInfo = Utils::CommandBufferAllocateInfo(immCommandPool, 1);
 
-        VK_CHECK(vkAllocateCommandBuffers(device, &cmdAllocInfo, &immCommandBuffer));
+        VkCheck(vkAllocateCommandBuffers(device, &cmdAllocInfo, &immCommandBuffer));
 
         mainDeletionQueue.PushFunction([=, this]()
         {
@@ -165,13 +166,13 @@ namespace FWE::Renderer::Vulkan
 
         for(int i = 0; i < FRAME_OVERLAP; i++)
         {
-            VK_CHECK(vkCreateFence(device, &fenceCreateInfo, nullptr, &frames[i].renderFence));
+            VkCheck(vkCreateFence(device, &fenceCreateInfo, nullptr, &frames[i].renderFence));
 
-            VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &frames[i].swapchainSemaphore));
-            VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &frames[i].renderSemaphore));
+            VkCheck(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &frames[i].swapchainSemaphore));
+            VkCheck(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &frames[i].renderSemaphore));
         }
 
-        VK_CHECK(vkCreateFence(device, &fenceCreateInfo, nullptr, &immFence));
+        VkCheck(vkCreateFence(device, &fenceCreateInfo, nullptr, &immFence));
         mainDeletionQueue.PushFunction([=, this]()
         {
             vkDestroyFence(device, immFence, nullptr);
@@ -261,7 +262,7 @@ namespace FWE::Renderer::Vulkan
         pipelineLayoutInfo.pSetLayouts = &singleImageDescriptorLayout;
         pipelineLayoutInfo.setLayoutCount = 1;
 
-        VK_CHECK(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &meshPipelineLayout));
+        VkCheck(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &meshPipelineLayout));
 
         Utils::PipelineBuilder pipelineBuilder;
 
@@ -358,25 +359,25 @@ namespace FWE::Renderer::Vulkan
 
     void Vulkan::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)> &&function)
     {
-        VK_CHECK(vkResetFences(device, 1, &immFence));
-        VK_CHECK(vkResetCommandBuffer(immCommandBuffer, 0));
+        VkCheck(vkResetFences(device, 1, &immFence));
+        VkCheck(vkResetCommandBuffer(immCommandBuffer, 0));
 
         VkCommandBuffer cmd = immCommandBuffer;
 
         VkCommandBufferBeginInfo cmdBeginInfo = Utils::CommandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-        VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+        VkCheck(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
         function(cmd);
 
-        VK_CHECK(vkEndCommandBuffer(cmd));
+        VkCheck(vkEndCommandBuffer(cmd));
 
         VkCommandBufferSubmitInfo cmdInfo = Utils::CommandBufferSubmitInfo(cmd);
         VkSubmitInfo2 submit = Utils::SubmitInfo(&cmdInfo, nullptr, nullptr);
 
-        VK_CHECK(vkQueueSubmit2(graphicsQueue, 1, &submit, immFence));
+        VkCheck(vkQueueSubmit2(graphicsQueue, 1, &submit, immFence));
 
-        VK_CHECK(vkWaitForFences(device, 1, &immFence, true, 9999999999));
+        VkCheck(vkWaitForFences(device, 1, &immFence, true, 9999999999));
     }
 
     AllocatedBuffer Vulkan::CreateBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage)
@@ -392,7 +393,7 @@ namespace FWE::Renderer::Vulkan
         vmaAllocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
         AllocatedBuffer newBuffer;
 
-        VK_CHECK(vmaCreateBuffer(allocator, &bufferInfo, &vmaAllocInfo, &newBuffer.buffer, &newBuffer.allocation, &newBuffer.info));
+        VkCheck(vmaCreateBuffer(allocator, &bufferInfo, &vmaAllocInfo, &newBuffer.buffer, &newBuffer.allocation, &newBuffer.info));
 
         return newBuffer;
     }
@@ -458,7 +459,7 @@ namespace FWE::Renderer::Vulkan
         drawExtent.height = drawImage.imageExtent.height;
         drawExtent.width = drawImage.imageExtent.width;
         
-        VK_CHECK(vkWaitForFences(device, 1, &GetCurrentFrame().renderFence, true, 1000000000));
+        VkCheck(vkWaitForFences(device, 1, &GetCurrentFrame().renderFence, true, 1000000000));
 
         GetCurrentFrame().deletionQueue.Flush();
 
@@ -472,15 +473,15 @@ namespace FWE::Renderer::Vulkan
             return;
         }
 
-        VK_CHECK(vkResetFences(device, 1, &GetCurrentFrame().renderFence));
+        VkCheck(vkResetFences(device, 1, &GetCurrentFrame().renderFence));
 
         cmd = GetCurrentFrame().mainCommandBuffer;
 
-        VK_CHECK(vkResetCommandBuffer(cmd, 0));
+        VkCheck(vkResetCommandBuffer(cmd, 0));
 
         VkCommandBufferBeginInfo cmdBeginInfo = Utils::CommandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-        VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+        VkCheck(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
         Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
@@ -720,7 +721,7 @@ namespace FWE::Renderer::Vulkan
 
         Utils::TransitionImage(cmd, swapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-        VK_CHECK(vkEndCommandBuffer(cmd));
+        VkCheck(vkEndCommandBuffer(cmd));
 
         VkCommandBufferSubmitInfo cmdInfo = Utils::CommandBufferSubmitInfo(cmd);
 
@@ -729,7 +730,7 @@ namespace FWE::Renderer::Vulkan
 
         VkSubmitInfo2 submit = Utils::SubmitInfo(&cmdInfo, &signalInfo, &waitInfo);
 
-        VK_CHECK(vkQueueSubmit2(graphicsQueue, 1, &submit, GetCurrentFrame().renderFence));
+        VkCheck(vkQueueSubmit2(graphicsQueue, 1, &submit, GetCurrentFrame().renderFence));
 
         VkPresentInfoKHR presentInfo = {};
         presentInfo.sType =  VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -860,7 +861,7 @@ namespace FWE::Renderer::Vulkan
         allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
         allocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        VK_CHECK(vmaCreateImage(allocator, &imgInfo, &allocInfo, &newImage.image, &newImage.allocation, nullptr));
+        VkCheck(vmaCreateImage(allocator, &imgInfo, &allocInfo, &newImage.image, &newImage.allocation, nullptr));
 
         VkImageAspectFlags aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
         if(format == VK_FORMAT_D32_SFLOAT)
@@ -871,7 +872,7 @@ namespace FWE::Renderer::Vulkan
         VkImageViewCreateInfo viewInfo = Utils::ImageViewCreateInfo(format, newImage.image, aspectFlag);
         viewInfo.subresourceRange.levelCount = imgInfo.mipLevels;
 
-        VK_CHECK(vkCreateImageView(device, &viewInfo, nullptr, &newImage.imageView));
+        VkCheck(vkCreateImageView(device, &viewInfo, nullptr, &newImage.imageView));
 
         return newImage;
     }
@@ -924,7 +925,7 @@ namespace FWE::Renderer::Vulkan
 
     void Vulkan::RemoveImage(const Image &image)
     {
-        for(unsigned int i = 0; i < images.size(); i++)
+        for(size_t i = 0; i < images.size(); i++)
         {
             if(image.allocatedImg.image == images[i].image)
             {

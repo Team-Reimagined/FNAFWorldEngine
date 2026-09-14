@@ -18,7 +18,7 @@ namespace FWE::MarionetteUI
         void Draw();
     private:
         void ProccessInputEvent(const SDL_Event *event);
-        void CheckElementClicked(glm::vec2 mousePos);
+        void GetElementClicked(glm::vec2 mousePos);
     private:
         bool initalized = false;
         std::unordered_map<std::string, TTF_Font *> fonts;

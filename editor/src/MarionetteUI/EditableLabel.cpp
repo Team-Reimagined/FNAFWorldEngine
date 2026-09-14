@@ -1,10 +1,11 @@
-#include "MarionetteUI/TextInput.hpp"
+#include "MarionetteUI/EditableLabel.hpp"
 #include "MarionetteUI/UIElement.hpp"
+#include "SDL3/SDL_keycode.h"
 #include "Types/Color.hpp"
 
 namespace FWE::MarionetteUI
 {
-    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
+    EditableLabel::EditableLabel(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
     userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     panel(position, size, atlas, tile, horizontalAlignment, verticalAlignnment, color), 
@@ -16,7 +17,7 @@ namespace FWE::MarionetteUI
         placeholderLabel.MakeInternal(this);
     }
 
-    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
+    EditableLabel::EditableLabel(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
     userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     panel(position, size, image, tile, horizontalAlignment, verticalAlignnment, color), 
@@ -28,7 +29,7 @@ namespace FWE::MarionetteUI
         placeholderLabel.MakeInternal(this);
     }
 
-    TextInput::TextInput(glm::vec2 position, glm::vec2 size, Font font, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
+    EditableLabel::EditableLabel(glm::vec2 position, glm::vec2 size, Font font, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
     userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
     panel(position, size, horizontalAlignment, verticalAlignnment, color), 
@@ -40,34 +41,34 @@ namespace FWE::MarionetteUI
         placeholderLabel.MakeInternal(this);
     }
 
-    void TextInput::SetPlaceholderText(const char *str)
+    void EditableLabel::SetPlaceholderText(const char *str)
     {
         placeholderLabel.SetText(str);
     }
 
-    void TextInput::SetFont(TTF_Font *font)
+    void EditableLabel::SetFont(TTF_Font *font)
     {
         userLabel.SetFont(font);
         placeholderLabel.SetFont(font);
     }
 
-    void TextInput::SetFontSize(float size)
+    void EditableLabel::SetFontSize(float size)
     {
         userLabel.SetFontSize(size);
         placeholderLabel.SetFontSize(size);
     }
 
-    void TextInput::SetFontColor(Types::Color color)
+    void EditableLabel::SetFontColor(Types::Color color)
     {
         userLabel.SetFontColor(color);
     }
 
-    void TextInput::SetPlaceholderFontColor(Types::Color color)
+    void EditableLabel::SetPlaceholderFontColor(Types::Color color)
     {
         placeholderLabel.SetFontColor(color);
     }
 
-    void TextInput::Draw()
+    void EditableLabel::Draw()
     {
         panel.Draw();
         if(userInput == "")
@@ -98,19 +99,27 @@ namespace FWE::MarionetteUI
         }
     }
 
-    void TextInput::AddCharacter(const char *character)
-    {
-        userInput += character;
-        userLabel.SetText(userInput.c_str());
-    }
-
-    void TextInput::RemoveCharacter()
+    void EditableLabel::RemoveCharacter()
     {
         if(userInput.length() == 0)
         {
             return;
         }
         userInput.pop_back();
+        userLabel.SetText(userInput.c_str());
+    }
+
+    void EditableLabel::KeyPressed(SDL_Keycode key)
+    {
+        if(key == SDLK_BACKSPACE)
+        {
+            RemoveCharacter();
+        }
+    }
+    
+    void EditableLabel::TextInput(const char *text)
+    {
+        userInput += text;
         userLabel.SetText(userInput.c_str());
     }
 }

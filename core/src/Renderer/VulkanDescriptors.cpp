@@ -33,7 +33,7 @@ namespace FWE::Renderer::Vulkan
         info.flags = flags;
 
         VkDescriptorSetLayout set;
-        VK_CHECK(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
+        VkCheck(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
 
         return set;
     }
@@ -74,7 +74,7 @@ namespace FWE::Renderer::Vulkan
         allocInfo.pSetLayouts = &layout;
 
         VkDescriptorSet discriptorSet;
-        VK_CHECK(vkAllocateDescriptorSets(device, &allocInfo, &discriptorSet));
+        VkCheck(vkAllocateDescriptorSets(device, &allocInfo, &discriptorSet));
 
         return discriptorSet;
     }
@@ -190,7 +190,7 @@ namespace FWE::Renderer::Vulkan
             poolToUse = GetPool(device);
             allocInfo.descriptorPool = poolToUse;
 
-            VK_CHECK(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet));
+            VkCheck(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet));
         }
 
         readyPools.push_back(poolToUse);

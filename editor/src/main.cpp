@@ -1,8 +1,9 @@
+#include "EditorPanels/Inspector.hpp"
 #include "MarionetteUI/UIManager.hpp"
 #include "Nodes/Initialize.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Input/InputManager.hpp"
-#include "SceneTree.hpp"
+#include "EditorPanels/SceneTree.hpp"
 #include "Scenes/Scene.hpp"
 
 int main() {
@@ -20,8 +21,12 @@ int main() {
 
     FWE::Nodes::Initalize();
 
+    FWE::Editor::Inspector inspector;
+    uiManager->AddUIElementToTree(&inspector);
+
     FWE::Scenes::Scene scene("resources/TestScene.scene");
     FWE::Editor::SceneTree sceneTree;
+    sceneTree.SetInspector(&inspector);
     uiManager->AddUIElementToTree(&sceneTree);
     sceneTree.SetScene(&scene);
     

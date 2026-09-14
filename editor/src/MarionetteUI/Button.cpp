@@ -49,7 +49,7 @@ namespace FWE::MarionetteUI
         label.Draw();
     }
 
-    void Button::Pressed()
+    void Button::OnLeftClick()
     {
         callback();
     }
