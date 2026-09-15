@@ -11,13 +11,19 @@
 
 namespace FWE::Editor
 {
-    SceneTree::SceneTree()
+    SceneTree::SceneTree() :
+    Panel({0, 0}, {300, 0}, MarionetteUI::HorizontalAlignment::Left, MarionetteUI::VerticalAlignment::Full, 0x101010FF)
     {
-        horizontalAlignment = MarionetteUI::HorizontalAlignment::Left;
-        verticalAlignnment = MarionetteUI::VerticalAlignment::Full;
-        size = {panel.size.x, panel.size.y};
-        panel.MakeInternal(this);
         sceneName.MakeInternal(this);
+        AddChild(&rootRightClickPanel);
+        AddChild(&nodeRightClickPanel);
+
+        rootRightClickPanel.AddOption("Rename", [](){Util::Logging::info("Rename");});
+        rootRightClickPanel.AddOption("Copy name", [](){Util::Logging::info("Copy name");});
+        
+        nodeRightClickPanel.AddOption("Rename", [](){Util::Logging::info("Rename");});
+        nodeRightClickPanel.AddOption("Copy name", [](){Util::Logging::info("Copy name");});
+        nodeRightClickPanel.AddOption("Delete node", [](){Util::Logging::info("Delete node");});
     }
 
     void SceneTree::LoadTreeRecursive(Nodes::Node *node, int indentationAmount)
@@ -45,10 +51,14 @@ namespace FWE::Editor
         LoadTree();
     }
 
+    void SceneTree::SetInspector(Inspector *inspector)
+    {
+        this->inspector = inspector;
+    }
 
     void SceneTree::Draw()
     {
-        panel.Draw();
+        Panel::Draw();
         sceneName.Draw();
         int elementsDrawn = 0;
         for(auto &i : elements)
@@ -60,6 +70,7 @@ namespace FWE::Editor
 
     void SceneTree::OnLeftClick()
     {
+        const int rootIndex = 0;
         if(inspector == nullptr)
         {
             Util::Logging::error("Inspector not set in SceneTree");
@@ -68,7 +79,7 @@ namespace FWE::Editor
         float mouseY;
         SDL_GetMouseState(NULL, &mouseY);
         int elementSelected = (mouseY - yOffset) / ySeparation;
-        if(elementSelected > 0 && elementSelected < elements.size())
+        if(elementSelected > rootIndex && elementSelected < elements.size())
         {
             inspector->SetNodeInspected(elements[elementSelected].node);
         }
@@ -78,8 +89,24 @@ namespace FWE::Editor
         }
     }
 
-    void SceneTree::SetInspector(Inspector *inspector)
+    void SceneTree::OnRightClick()
     {
-        this->inspector = inspector;
+        const int rootIndex = 0;
+        float mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        int elementSelected = (mouseY - yOffset) / ySeparation;
+        if(elementSelected < elements.size())
+        {
+            selectedNode = elements[elementSelected].node;
+            if(elementSelected == rootIndex)
+            {
+                rootRightClickPanel.ShowPanel({mouseX, mouseY});
+            }
+            else
+            {
+                nodeRightClickPanel.ShowPanel({mouseX, mouseY});
+            }
+            
+        }
     }
 }

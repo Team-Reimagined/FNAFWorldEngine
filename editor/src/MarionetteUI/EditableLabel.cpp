@@ -6,39 +6,45 @@
 namespace FWE::MarionetteUI
 {
     EditableLabel::EditableLabel(glm::vec2 position, glm::vec2 size, Font font, Types::Atlas atlas, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
-    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
-    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
-    panel(position, size, atlas, tile, horizontalAlignment, verticalAlignnment, color), 
+    userLabel({0, 0}, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    placeholderLabel({0, 0}, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    panel({0, 0}, size, atlas, tile, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {
         userLabel.topLevel = false;
         placeholderLabel.topLevel = false;
+        panel.topLevel = false;
         userLabel.MakeInternal(this);
         placeholderLabel.MakeInternal(this);
+        panel.MakeInternal(this);
     }
 
     EditableLabel::EditableLabel(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
-    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
-    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
-    panel(position, size, image, tile, horizontalAlignment, verticalAlignnment, color), 
+    userLabel({0, 0}, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    placeholderLabel({0, 0}, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    panel({0, 0}, size, image, tile, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {
         userLabel.topLevel = false;
         placeholderLabel.topLevel = false;
+        panel.topLevel = false;
         userLabel.MakeInternal(this);
         placeholderLabel.MakeInternal(this);
+        panel.MakeInternal(this);
     }
 
     EditableLabel::EditableLabel(glm::vec2 position, glm::vec2 size, Font font, const char *placeholderText, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment, Types::Color color) : 
-    userLabel(position, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
-    placeholderLabel(position, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
-    panel(position, size, horizontalAlignment, verticalAlignnment, color), 
+    userLabel({0, 0}, "", font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    placeholderLabel({0, 0}, placeholderText, font, HorizontalAlignment::Center, VerticalAlignment::Center), 
+    panel({0, 0}, size, horizontalAlignment, verticalAlignnment, color), 
     UIElement(position, size, horizontalAlignment, verticalAlignnment)
     {
         userLabel.topLevel = false;
         placeholderLabel.topLevel = false;
+        panel.topLevel = false;
         userLabel.MakeInternal(this);
         placeholderLabel.MakeInternal(this);
+        panel.MakeInternal(this);
     }
 
     void EditableLabel::SetPlaceholderText(const char *str)

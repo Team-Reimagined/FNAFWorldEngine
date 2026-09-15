@@ -16,6 +16,8 @@ namespace FWE::MarionetteUI
         TTF_Font *GetDefaultFont();
         void AddUIElementToTree(UIElement *element);
         void Draw();
+        void GrabFocus(UIElement *element);
+        void ReleaseFocus(UIElement *element);
     private:
         void ProccessInputEvent(const SDL_Event *event);
         void GetElementClicked(glm::vec2 mousePos);
@@ -23,7 +25,7 @@ namespace FWE::MarionetteUI
         bool initalized = false;
         std::unordered_map<std::string, TTF_Font *> fonts;
         UIElement root;
-        UIElement *selected;
+        UIElement *selected = nullptr;
         TTF_Font *defaultFont;
     };
 }

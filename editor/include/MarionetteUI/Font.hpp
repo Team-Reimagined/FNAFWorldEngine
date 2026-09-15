@@ -8,7 +8,7 @@ namespace FWE::MarionetteUI
     struct Font
     {
         TTF_Font *font;
-        float fontSize;
-        Types::Color color;
+        float fontSize = 12;
+        Types::Color color = 0xFFFFFFFF;
     };
 }

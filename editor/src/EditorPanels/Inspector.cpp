@@ -1,24 +1,25 @@
 #include "EditorPanels/Inspector.hpp"
 #include "MarionetteUI/Label.hpp"
+#include "MarionetteUI/Panel.hpp"
 #include "MarionetteUI/UIElement.hpp"
 #include "Nodes/Node.hpp"
 
 namespace FWE::Editor
 {
-    Inspector::Inspector()
+    Inspector::Inspector() :
+    MarionetteUI::Panel({0, 0}, {300, 0}, MarionetteUI::HorizontalAlignment::Right, MarionetteUI::VerticalAlignment::Full, 0x101010FF)
     {
         horizontalAlignment = MarionetteUI::HorizontalAlignment::Right;
         verticalAlignnment = MarionetteUI::VerticalAlignment::Full;
-        panel.MakeInternal(this);
-        panel.AddChild(&noSelectionText);
+        noSelectionText.MakeInternal(this);
         noSelectionText.topLevel = false;
-        panel.AddChild(&selectedLabel);
+        selectedLabel.MakeInternal(this);
         selectedLabel.topLevel = false;
     }
 
     void Inspector::Draw()
     {
-        panel.Draw();
+        Panel::Draw();
         if(selectedNode == nullptr)
         {
             noSelectionText.Draw();

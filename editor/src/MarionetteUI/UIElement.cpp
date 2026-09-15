@@ -1,6 +1,8 @@
 #include "MarionetteUI/UIElement.hpp"
+#include "MarionetteUI/UIManager.hpp"
 #include "Util/Logging.hpp"
 #include "Renderer/Renderer.hpp"
+#include <algorithm>
 
 namespace FWE::MarionetteUI
 {
@@ -25,6 +27,44 @@ namespace FWE::MarionetteUI
                 }
             }
         }
+        ReleaseFocus();
+    }
+
+    UIElement::UIElement(UIElement &&other) noexcept :
+    children(std::move(other.children)),
+    internalChildren(std::move(other.internalChildren))
+    {
+        for(auto &i : children)
+        {
+            i->parent = this;
+        }
+
+        for(auto &i : internalChildren)
+        {
+            i->parent = this;
+        }
+
+        position = other.position;
+        size = other.size;
+        visible = other.visible;
+        blockMouse = other.blockMouse;
+        horizontalAlignment = other.horizontalAlignment;
+        verticalAlignnment = other.verticalAlignnment;
+        topLevel = other.topLevel;
+        internal = other.internal;
+
+        if(other.parent != nullptr)
+        {
+            if(internal)
+            {
+                MakeInternal(other.parent);
+            }
+            else
+            {
+                other.parent->AddChild(this);
+            }
+        }
+        other.RemoveFromTree();
     }
 
     UIElement *UIElement::GetParent()
@@ -70,11 +110,21 @@ namespace FWE::MarionetteUI
         {
             return;
         }
+        children[index]->parent = nullptr;
         children.erase(children.begin() + index);
     }
 
     void UIElement::RemoveFromTree()
     {
+        if(parent == nullptr)
+        {
+            return;
+        }
+        if(internal)
+        {
+            parent = nullptr;
+            return;
+        }
         for(int i = 0; i < parent->GetChildrenCount(); i++)
         {
             if(parent->GetChild(i) == this)
@@ -83,6 +133,15 @@ namespace FWE::MarionetteUI
                 break;
             }
         }
+    }
+
+    glm::vec2 UIElement::GetGlobalPosition()
+    {
+        if(!topLevel && parent != nullptr)
+        {
+            return position + parent->GetGlobalPosition();
+        }
+        return position;
     }
 
     glm::vec2 UIElement::GetAlignmentOffset()
@@ -186,10 +245,29 @@ namespace FWE::MarionetteUI
         {
             this->parent = parent;
             internal = true;
+            parent->AddInternalChild(this);
         }
         else
         {
             Util::Logging::error("UIElement is already a child of another UIElement");
         }
+    }
+
+    void UIElement::AddInternalChild(UIElement *element)
+    {
+        if(std::find(internalChildren.begin(), internalChildren.end(), element) == internalChildren.end())
+        {
+            internalChildren.push_back(element);
+        }
+    }
+
+    void UIElement::GrabFocus()
+    {
+        UIManager::GetInstance()->GrabFocus(this);
+    }
+
+    void UIElement::ReleaseFocus()
+    {
+        UIManager::GetInstance()->ReleaseFocus(this);
     }
 }

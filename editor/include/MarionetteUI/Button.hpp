@@ -14,6 +14,7 @@ namespace FWE::MarionetteUI
         Button(glm::vec2 position, glm::vec2 size, const char *str, Font font, Types::Atlas atlas, bool tile = false, HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left, VerticalAlignment verticalAlignnment = VerticalAlignment::Top, Types::Color color = 0xFFFFFFFF);
         Button(glm::vec2 position, glm::vec2 size, const char *str, Font font, Renderer::Image image, bool tile = false, HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left, VerticalAlignment verticalAlignnment = VerticalAlignment::Top, Types::Color color = 0xFFFFFFFF);
         Button(glm::vec2 position, glm::vec2 size, const char *str, Font font, HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left, VerticalAlignment verticalAlignnment = VerticalAlignment::Top, Types::Color color = 0xFFFFFFFF);
+
         void SetCallback(std::function<void()> callback);
         void Draw() override;
         void OnLeftClick() override;

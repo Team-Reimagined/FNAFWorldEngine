@@ -35,12 +35,12 @@ namespace FWE::MarionetteUI
             {
                 tileCount = scale;
             }
-            Renderer::Renderer::GetInstance()->Draw(atlas, position + offset, scale, tileCount, color);
+            Renderer::Renderer::GetInstance()->Draw(atlas, GetGlobalPosition() + offset, scale, tileCount, color);
         }
         else
         {
             glm::vec2 offset = GetAlignmentOffset();
-            Renderer::Renderer::GetInstance()->Draw(position + offset, size, color);
+            Renderer::Renderer::GetInstance()->Draw(GetGlobalPosition() + offset, size, color);
         }
     }
 }

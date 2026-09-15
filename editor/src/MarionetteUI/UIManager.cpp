@@ -97,10 +97,11 @@ namespace FWE::MarionetteUI
         if(element->visible)
         {
             glm::vec2 offset = element->GetAlignmentOffset();
-            const float leftBound = element->position.x + offset.x - element->size.x / 2;
-            const float rightBound = element->position.x + offset.x + element->size.x / 2;
-            const float upBound = element->position.y + offset.y - element->size.y / 2;
-            const float downBound = element->position.y + offset.y + element->size.y / 2;
+            glm::vec2 globalPos = element->GetGlobalPosition();
+            const float leftBound = globalPos.x + offset.x - element->size.x / 2;
+            const float rightBound = globalPos.x + offset.x + element->size.x / 2;
+            const float upBound = globalPos.y + offset.y - element->size.y / 2;
+            const float downBound = globalPos.y + offset.y + element->size.y / 2;
             if(mousePos.x >= leftBound && mousePos.x <= rightBound && mousePos.y >= upBound && mousePos.y <= downBound && element->blockMouse)
             {
                 *elementClicked = element;
@@ -114,8 +115,9 @@ namespace FWE::MarionetteUI
 
     void UIManager::GetElementClicked(glm::vec2 mousePos)
     {
-        selected = nullptr;
-        CheckElementRecursive(mousePos, &selected, &root);
+        UIElement *newSelected = nullptr;
+        CheckElementRecursive(mousePos, &newSelected, &root);
+        GrabFocus(newSelected);
     }
 
     void UIManager::AddUIElementToTree(UIElement *element)
@@ -143,5 +145,30 @@ namespace FWE::MarionetteUI
     TTF_Font *UIManager::GetDefaultFont()
     {
         return defaultFont;
+    }
+
+    void UIManager::GrabFocus(UIElement *element)
+    {
+        if(element != selected)
+        {
+            if(selected != nullptr)
+            {
+                selected->OnFocusLost();
+            }
+            selected = element;
+            if(element != nullptr)
+            {
+                selected->OnFocusGrabbed();
+            }
+        }
+    }
+
+    void UIManager::ReleaseFocus(UIElement *element)
+    {
+        if(element == selected && element != nullptr)
+        {
+            element->OnFocusLost();
+            selected = nullptr;
+        }
     }
 }
