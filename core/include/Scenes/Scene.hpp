@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Nodes/Node.hpp"
+#include <memory>
 
 namespace FWE::Scenes
 {
@@ -14,14 +15,14 @@ namespace FWE::Scenes
         void Unload();
         bool IsLoaded();
 
-        Nodes::Node *GetRoot();
+        std::shared_ptr<Nodes::Node> GetRoot();
         const char *GetName();
 
         Scene() {}
         Scene(const char *scenePath);
         ~Scene();
     private:
-        Nodes::Node root;
+        std::shared_ptr<Nodes::Node> root;
         bool loaded = false;
         std::string name;
     };

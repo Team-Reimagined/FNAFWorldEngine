@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -8,20 +9,20 @@
 
 namespace FWE::Nodes
 {
-    class Node
+    class Node : public std::enable_shared_from_this<Node>
     {
     public:
         Node();
-        ~Node();
+        virtual ~Node() {}
         virtual void Init() {}
         virtual void Update() {}
         virtual void Draw() {}
-        void AddChild(Node *node);
+        void AddChild(std::shared_ptr<Node> &node);
         glm::vec2 GetGlobalPosition();
         glm::vec2 GetGlobalScale();
-        Node *GetParent();
-        Node *GetChild(unsigned int index);
-        const std::vector<Node *> &GetChildren();
+        std::shared_ptr<Node> GetParent();
+        std::shared_ptr<Node> GetChild(unsigned int index);
+        std::vector<std::shared_ptr<Node>> &GetChildren();
         unsigned int GetChildrenCount();
         void RemoveChild(unsigned int index);
         void RemoveFromTree();
@@ -34,7 +35,7 @@ namespace FWE::Nodes
         std::string name;
         bool visible = true;
     private:
-        Node *parent = nullptr;
-        std::vector<Node *> children;
+        std::weak_ptr<Node> parent;
+        std::vector<std::shared_ptr<Node>> children;
     };
 }

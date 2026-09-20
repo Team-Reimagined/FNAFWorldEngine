@@ -1,6 +1,6 @@
 {
     "SceneName": "TestScene",
-    "Root":
+    "TestScene":
     {
         "ChildCount": 3,
         "Children":

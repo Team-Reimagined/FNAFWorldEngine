@@ -44,6 +44,9 @@ namespace FWE::MarionetteUI
             i->parent = this;
         }
 
+        other.children.clear();
+        other.internalChildren.clear();
+
         position = other.position;
         size = other.size;
         visible = other.visible;
@@ -63,8 +66,8 @@ namespace FWE::MarionetteUI
             {
                 other.parent->AddChild(this);
             }
+            other.RemoveFromTree();
         }
-        other.RemoveFromTree();
     }
 
     UIElement *UIElement::GetParent()

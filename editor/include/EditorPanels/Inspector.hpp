@@ -13,10 +13,11 @@ namespace FWE::Editor
     public:
         Inspector();
         void Draw() override;
-        void SetNodeInspected(Nodes::Node *node = nullptr);
+        void SetNodeInspected(std::shared_ptr<Nodes::Node> node = nullptr);
+        void NodeDeleted(std::shared_ptr<Nodes::Node> node);
     private:
         MarionetteUI::Label noSelectionText {{0, 0}, "Select a node to see properties here", {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), 16}, MarionetteUI::HorizontalAlignment::Center, MarionetteUI::VerticalAlignment::Center};
-        Nodes::Node *selectedNode = nullptr;
+        std::shared_ptr<Nodes::Node> selectedNode = nullptr;
         MarionetteUI::Label selectedLabel {{0,10}, "", {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), 20}, MarionetteUI::HorizontalAlignment::Center, MarionetteUI::VerticalAlignment::Top};
     };
 }

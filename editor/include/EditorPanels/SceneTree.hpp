@@ -7,13 +7,14 @@
 #include "MarionetteUI/UIManager.hpp"
 #include "Nodes/Node.hpp"
 #include "Scenes/Scene.hpp"
+#include <memory>
 #include <vector>
 
 namespace FWE::Editor
 {
     struct Elements
     {
-        Nodes::Node *node;
+        std::shared_ptr<Nodes::Node> node;
         MarionetteUI::Label nameLabel;
     };
 
@@ -28,7 +29,12 @@ namespace FWE::Editor
         void SetInspector(Inspector *inspector);
     private:
         void LoadTree();
-        void LoadTreeRecursive(Nodes::Node *node, int indentationAmount);
+        void LoadTreeRecursive(std::shared_ptr<Nodes::Node> node, int indentationAmount);
+
+        void Rename();
+        void CopyName();
+        void AddNode();
+        void DeleteNode();
     private:
         MarionetteUI::Label sceneName {{10, 10}, "", {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), 20}};
         std::vector<Elements> elements;
@@ -36,8 +42,8 @@ namespace FWE::Editor
         const float yOffset = 15;
         const float ySeparation = 20;
         Inspector *inspector = nullptr;
-        FWE::Editor::RightClickPanel rootRightClickPanel {{150, 50}, {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), 16}, 0x181818FF};
-        FWE::Editor::RightClickPanel nodeRightClickPanel {{150, 50}, {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), 16}, 0x181818FF};
-        Nodes::Node *selectedNode = nullptr;
+        FWE::Editor::RightClickPanel rootRightClickPanel {{100, 30}, {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), 14}, 0x181818FF};
+        FWE::Editor::RightClickPanel nodeRightClickPanel {{100, 30}, {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), 14}, 0x181818FF};
+        std::shared_ptr<Nodes::Node> selectedNode = nullptr;
     };
 }

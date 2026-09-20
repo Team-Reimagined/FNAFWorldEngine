@@ -929,7 +929,7 @@ namespace FWE::Renderer::Vulkan
         {
             if(image.allocatedImg.image == images[i].image)
             {
-                std::swap(images[images.size() - 1], images[i]);
+                std::swap(images[i], images.back());
                 images.pop_back();
                 break;
             }

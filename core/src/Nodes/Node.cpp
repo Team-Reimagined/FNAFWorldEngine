@@ -10,21 +10,6 @@ namespace FWE::Nodes
         RegisterVariable("Scale", Types::Vector2, &scale);
     }
 
-    Node::~Node()
-    {
-        if(parent != nullptr)
-        {
-            for(int i = 0; i < parent->GetChildrenCount(); i++)
-            {
-                if(parent->GetChild(i) == this)
-                {
-                    parent->RemoveChild(i);
-                    break;
-                }
-            }
-        }
-    }
-
     void Node::RegisterVariable(const char *name, Types type, void *variable)
     {
         if(variable != nullptr)
@@ -38,11 +23,11 @@ namespace FWE::Nodes
         }
     }
 
-    void Node::AddChild(Node *node)
+    void Node::AddChild(std::shared_ptr<Node> &node)
     {
-        if(node->parent == nullptr)
+        if(node->parent.expired())
         {
-            node->parent = this;
+            node->parent = weak_from_this();
             children.push_back(node);
         }
         else
@@ -54,11 +39,11 @@ namespace FWE::Nodes
     glm::vec2 Node::GetGlobalPosition()
     {
         glm::vec2 globalPosition = position;
-        Node *currentNode = parent;
+        std::shared_ptr<Node> currentNode = GetParent();
         while (currentNode != nullptr)
         {
             globalPosition += currentNode->position;
-            currentNode = currentNode->parent;
+            currentNode = currentNode->GetParent();
         }
         return globalPosition;
     }
@@ -66,21 +51,21 @@ namespace FWE::Nodes
     glm::vec2 Node::GetGlobalScale()
     {
         glm::vec2 globalScale = scale;
-        Node *currentNode = parent;
-        while (currentNode !=nullptr)
+        std::shared_ptr<Node> currentNode = GetParent();
+        while (currentNode != nullptr)
         {
             globalScale *= currentNode->scale;
-            currentNode = currentNode->parent;
+            currentNode = currentNode->GetParent();
         }
         return globalScale;
     }
 
-    Node *Node::GetParent()
+    std::shared_ptr<Node> Node::GetParent()
     {
-        return parent;
+        return parent.lock();
     }
 
-    Node *Node::GetChild(unsigned int index)
+    std::shared_ptr<Node> Node::GetChild(unsigned int index)
     {
         if(index >= children.size())
         {
@@ -89,7 +74,7 @@ namespace FWE::Nodes
         return children[index];
     }
 
-    const std::vector<Node *> &Node::GetChildren()
+    std::vector<std::shared_ptr<Node>> &Node::GetChildren()
     {
         return children;
     }
@@ -110,12 +95,15 @@ namespace FWE::Nodes
 
     void Node::RemoveFromTree()
     {
-        for(int i = 0; i < parent->GetChildrenCount(); i++)
+        if(auto sharedParent = parent.lock())
         {
-            if(parent->GetChild(i) == this)
+            for(int i = 0; i < sharedParent->GetChildrenCount(); i++)
             {
-                parent->RemoveChild(i);
-                break;
+                if(sharedParent->GetChild(i) == shared_from_this())
+                {
+                    sharedParent->RemoveChild(i);
+                    break;
+                }
             }
         }
     }

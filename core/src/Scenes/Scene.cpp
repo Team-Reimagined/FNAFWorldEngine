@@ -1,19 +1,20 @@
 #include "Scenes/Scene.hpp"
 #include "External/json.hpp"
 #include <fstream>
+#include <memory>
 #include "Nodes/Node.hpp"
 #include "Nodes/NodeDatabase.hpp"
 
 namespace FWE::Scenes
 {
-    void LoadChildren(nlohmann::json sceneData, FWE::Nodes::Node *parent)
+    void LoadChildren(nlohmann::json sceneData, std::shared_ptr<FWE::Nodes::Node> &parent)
     {
         FWE::Nodes::NodeDatabase *database = FWE::Nodes::NodeDatabase::GetInstance();
         int childrenCount = sceneData.at("ChildCount");
         for(int i = 0; i < childrenCount; i++)
         {
             std::string type = sceneData.at("Children")[i].at("Type");
-            FWE::Nodes::Node *node = database->CreateNode(type.c_str());
+            std::shared_ptr<Nodes::Node> node = database->CreateNode(type.c_str());
             for(auto [str, var] : node->registeredVariables)
             {
                 var.SetVariable(sceneData.at("Children")[i].at(str));
@@ -33,7 +34,8 @@ namespace FWE::Scenes
         std::ifstream sceneFile(scenePath);
         nlohmann::json sceneData = nlohmann::json::parse(sceneFile);
         name = sceneData.at("SceneName");
-        LoadChildren(sceneData.at("Root"), &root);
+        root = database->CreateNode("Node");
+        LoadChildren(sceneData.at(name), root);
         loaded = true;
     }
 
@@ -41,25 +43,12 @@ namespace FWE::Scenes
     {
         Load(scenePath);
     }
-    
-    void DestroyRecursive(Nodes::Node *node)
-    {
-        for(int i = 0; i < node->GetChildrenCount(); i++)
-        {
-            DestroyRecursive(node->GetChild(i));
-        }
-        delete node;
-    }
 
     void Scene::Unload()
     {
         if(loaded)
         {
-            for(int i = 0; i < root.GetChildrenCount(); i++)
-            {
-                DestroyRecursive(root.GetChild(i));
-            }
-            root = Nodes::Node();
+            root.reset();
             loaded = false;
         }
     }
@@ -74,12 +63,12 @@ namespace FWE::Scenes
         Unload();
     }
 
-    Nodes::Node *Scene::GetRoot()
+    std::shared_ptr<Nodes::Node> Scene::GetRoot()
     {
-        return &root;
+        return root;
     }
 
-    void UpdateRecursive(FWE::Nodes::Node *node)
+    void UpdateRecursive(std::shared_ptr<FWE::Nodes::Node> node)
     {
         node->Update();
         for(int i = 0; i < node->GetChildrenCount(); i++)
@@ -90,10 +79,10 @@ namespace FWE::Scenes
 
     void Scene::Update()
     {
-        UpdateRecursive(&root);
+        UpdateRecursive(root);
     }
 
-    void DrawRecursive(FWE::Nodes::Node *node)
+    void DrawRecursive(std::shared_ptr<FWE::Nodes::Node> node)
     {
         if(node->visible)
         {
@@ -107,7 +96,7 @@ namespace FWE::Scenes
 
     void Scene::Draw()
     {
-        DrawRecursive(&root);  
+        DrawRecursive(root);  
     }
 
     const char *Scene::GetName()

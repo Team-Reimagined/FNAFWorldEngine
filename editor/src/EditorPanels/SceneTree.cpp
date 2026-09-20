@@ -4,10 +4,14 @@
 #include "MarionetteUI/UIElement.hpp"
 #include "MarionetteUI/UIManager.hpp"
 #include "Nodes/Node.hpp"
+#include "SDL3/SDL_clipboard.h"
 #include "Scenes/Scene.hpp"
 #include "Util/Logging.hpp"
 #include "glm/ext/vector_float2.hpp"
 #include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
 
 namespace FWE::Editor
 {
@@ -18,15 +22,17 @@ namespace FWE::Editor
         AddChild(&rootRightClickPanel);
         AddChild(&nodeRightClickPanel);
 
-        rootRightClickPanel.AddOption("Rename", [](){Util::Logging::info("Rename");});
-        rootRightClickPanel.AddOption("Copy name", [](){Util::Logging::info("Copy name");});
+        rootRightClickPanel.AddOption("Rename", [=, this](){Rename();});
+        rootRightClickPanel.AddOption("Copy name", [=, this](){CopyName();});
+        rootRightClickPanel.AddOption("Add node", [=, this](){AddNode();});
         
-        nodeRightClickPanel.AddOption("Rename", [](){Util::Logging::info("Rename");});
-        nodeRightClickPanel.AddOption("Copy name", [](){Util::Logging::info("Copy name");});
-        nodeRightClickPanel.AddOption("Delete node", [](){Util::Logging::info("Delete node");});
+        nodeRightClickPanel.AddOption("Rename", [=, this](){Rename();});
+        nodeRightClickPanel.AddOption("Copy name", [=, this](){CopyName();});
+        nodeRightClickPanel.AddOption("Add node", [=, this](){AddNode();});
+        nodeRightClickPanel.AddOption("Delete node", [=, this](){DeleteNode();});
     }
 
-    void SceneTree::LoadTreeRecursive(Nodes::Node *node, int indentationAmount)
+    void SceneTree::LoadTreeRecursive(std::shared_ptr<Nodes::Node> node, int indentationAmount)
     {
         const float indentationSize = 8;
         const float fontSize = 16;
@@ -39,7 +45,7 @@ namespace FWE::Editor
 
     void SceneTree::LoadTree()
     {
-        Nodes::Node *root = scene->GetRoot();
+        std::shared_ptr<Nodes::Node> root = scene->GetRoot();
         LoadTreeRecursive(root, 1);
     }
 
@@ -107,6 +113,36 @@ namespace FWE::Editor
                 nodeRightClickPanel.ShowPanel({mouseX, mouseY});
             }
             
+        }
+    }
+
+    void SceneTree::Rename()
+    {
+        Util::Logging::info("Rename");
+    }
+
+    void SceneTree::CopyName()
+    {
+        SDL_SetClipboardText(selectedNode->name.c_str());
+    }
+
+    void SceneTree::AddNode()
+    {
+        Util::Logging::info("New node");
+    }
+
+    void SceneTree::DeleteNode()
+    {
+        for(size_t i = 0; i < elements.size(); i++)
+        {
+            if(elements[i].node == selectedNode)
+            {
+                std::swap(elements[i], elements.back());
+                elements.pop_back();
+                inspector->NodeDeleted(selectedNode);
+                selectedNode->RemoveFromTree();
+                selectedNode = nullptr;
+            }
         }
     }
 }

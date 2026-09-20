@@ -30,7 +30,7 @@ namespace FWE::Editor
         }
     }
 
-    void Inspector::SetNodeInspected(Nodes::Node *node)
+    void Inspector::SetNodeInspected(std::shared_ptr<Nodes::Node> node)
     {
         selectedNode = node;
         if(node == nullptr)
@@ -38,5 +38,13 @@ namespace FWE::Editor
             return;
         }
         selectedLabel.SetText(node->name.c_str());
+    }
+
+    void Inspector::NodeDeleted(std::shared_ptr<Nodes::Node> node)
+    {
+        if(selectedNode == node)
+        {
+            selectedNode = nullptr;
+        }
     }
 }

@@ -27,11 +27,12 @@ namespace FWE::MarionetteUI
     public:
         UIElement() {};
         UIElement(glm::vec2 position, glm::vec2 size, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignnment);
-        ~UIElement();
+        virtual ~UIElement();
 
-        UIElement(UIElement &other) = default;
+        UIElement(const UIElement &other) = default;
         UIElement(UIElement &&other) noexcept;
-
+        UIElement& operator=(const UIElement& other) = default;
+        
         virtual void Draw(){}
 
         virtual void OnLeftClick(){}
