@@ -31,6 +31,11 @@ namespace FWE::Renderer
         //SDL_RenderTexture(renderer, image.texture, NULL, &image.position);
     }
 
+    void Renderer::DrawFont(const Types::FontAtlas *fontAtlas, const char *text, glm::vec2 position, float fontSize, Types::Color color)
+    {
+        vulkan.DrawFont(fontAtlas, text, position, fontSize, color);
+    }
+
     void Renderer::Render()
     {
         vulkan.Render();

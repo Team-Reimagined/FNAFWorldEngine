@@ -51,6 +51,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
+FetchContent_Declare(
+    msdf-atlas-gen
+    GIT_REPOSITORY https://github.com/Chlumsky/msdf-atlas-gen
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(msdf-atlas-gen)
+
 find_package(Vulkan)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -60,6 +67,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     vk-bootstrap::vk-bootstrap
     GPUOpen::VulkanMemoryAllocator
     Vulkan::Vulkan
+    msdf-atlas-gen
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include/ ${vulkanmemoryallocator_SOURCE_DIR}/include)

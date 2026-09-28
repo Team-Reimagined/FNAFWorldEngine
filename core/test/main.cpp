@@ -3,10 +3,13 @@
 #include "Audio/AudioManager.hpp"
 #include "Audio/AudioManager.hpp"
 #include "Nodes/Initialize.hpp"
+#include "ResourceLoader/FontLoader.hpp"
 #include "Scenes/SceneManager.hpp"
 #include "Input/InputManager.hpp"
 #include "ResourceLoader/AudioLoader.hpp"
+#include "Types/FontAtlas.hpp"
 #include <stdbool.h>
+#include <msdf-atlas-gen/msdf-atlas-gen.h>
 
 int main() {
 
@@ -39,6 +42,8 @@ int main() {
     
     bool running = true;
 
+    FWE::Types::FontAtlas *font = FWE::ResourceLoader::FontLoader::GetInstance()->LoadFont("resources/fonts/Roboto-VariableFont_wdth,wght.ttf");
+
     while (running)
     {
         inputManager->ClearBuffers();
@@ -55,6 +60,8 @@ int main() {
         {
             running = false;
         }
+        renderer->DrawFont(font, "Hello FNaF World", {400, 75}, 72);
+        renderer->DrawFont(font, "Hello FNaF World", {400, 125}, 24);
         renderer->Render();
     }
     renderer->Shutdown();

@@ -2,6 +2,7 @@
 
 #include "Renderer/AllocatedImage.hpp"
 #include "Types/Color.hpp"
+#include "Types/FontAtlas.hpp"
 #include "VulkanTypes.hpp"
 #include <SDL3/SDL.h>
 #include <vector>
@@ -53,6 +54,7 @@ namespace FWE::Renderer::Vulkan
         void Render();
         void Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount = {1, 1}, FWE::Types::Color color = 0xFFFFFFFF);
         void Draw(glm::vec2 position, glm::vec2 size, FWE::Types::Color color = 0xFFFFFFFF);
+        void DrawFont(const Types::FontAtlas *fontAtlas, const char *text, glm::vec2 position, float fontSize = 12, Types::Color color = 0xFFFFFFFF);
         void SetClearColor(Types::Color color = 0x000000FF);
         AllocatedImage AddImage(const ResourceLoader::ImageResource &image);
         void RemoveImage(const Image &image);
@@ -67,6 +69,7 @@ namespace FWE::Renderer::Vulkan
         void InitDescriptors();
         void InitPipelines();
         void InitMeshPipeline();
+        void InitFontPipeline();
         void InitDefaultData();
 
         FrameData &GetCurrentFrame();
@@ -82,6 +85,8 @@ namespace FWE::Renderer::Vulkan
         void ResizeSwapchain();
 
         void StartFrame();
+
+        void StartDrawing();
 
         void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)> &&function);
 
@@ -136,6 +141,9 @@ namespace FWE::Renderer::Vulkan
 
         VkPipelineLayout meshPipelineLayout;
         VkPipeline meshPipeline;
+
+        VkPipelineLayout fontPipelineLayout;
+        VkPipeline fontPipeline;
 
         GPUMeshBuffers rectangle;
 

@@ -4,6 +4,7 @@
 #include <string>
 #include "Panel.hpp"
 #include "Types/Color.hpp"
+#include "Types/FontAtlas.hpp"
 
 namespace FWE::MarionetteUI
 {
@@ -14,7 +15,7 @@ namespace FWE::MarionetteUI
         EditableLabel(glm::vec2 position, glm::vec2 size, Font font, Renderer::Image image, bool tile = false, const char *placeholderText = "", HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left, VerticalAlignment verticalAlignnment = VerticalAlignment::Top, Types::Color color = 0xFFFFFFFF);
         EditableLabel(glm::vec2 position, glm::vec2 size, Font font, const char *placeholderText = "", HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left, VerticalAlignment verticalAlignnment = VerticalAlignment::Top, Types::Color color = 0xFFFFFFFF);
         void SetPlaceholderText(const char *str);
-        void SetFont(TTF_Font *font);
+        void SetFont(Types::FontAtlas *font);
         void SetFontSize(float size);
         void SetFontColor(Types::Color color);
         void SetPlaceholderFontColor(Types::Color color);

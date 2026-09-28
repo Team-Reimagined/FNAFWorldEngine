@@ -1,5 +1,7 @@
 #include "MarionetteUI/Label.hpp"
 #include "Renderer/Renderer.hpp"
+#include "Types/FontAtlas.hpp"
+#include "glm/ext/vector_float2.hpp"
 
 namespace FWE::MarionetteUI
 {
@@ -19,62 +21,60 @@ namespace FWE::MarionetteUI
         {
             text = " ";
         }
-        Generate();
+        SetTextSize();
     }
 
-    void Label::SetFont(TTF_Font *font)
+    void Label::SetFont(Types::FontAtlas *font)
     {
-        this->font.font = font;
-        Generate();
+        this->font.fontAtlas = font;
+        SetTextSize();
     }
 
     void Label::SetFontSize(float size)
     {
         font.fontSize = size;
-        Generate();
+        SetTextSize();
     }
 
     void Label::SetFontColor(Types::Color color)
     {
         font.color = color;
-        Generate();
     }
 
-    void Label::Generate()
+    void Label::SetTextSize()
     {
-        TTF_SetFontSize(font.font, font.fontSize);
-        SDL_Surface *surfArgb = TTF_RenderText_Blended(font.font, text.c_str(), 0, {font.color.r, font.color.g, font.color.b, font.color.a});
-        SDL_Surface *surf = SDL_ConvertSurface(surfArgb, SDL_PIXELFORMAT_RGBA32);
-        SDL_DestroySurface(surfArgb);
-        Renderer::Renderer *renderer = Renderer::Renderer::GetInstance();
-        if(texture.img.allocatedImg.image != nullptr)
+        const char *currentChar = text.c_str();
+        double up, down, left, right;
+        font.fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+        float leftBound = left;
+            
+        float cursor = 0;
+        while(*(currentChar + 1) != '\0')
         {
-            renderer->RemoveImage(texture.img);
+            cursor += font.fontAtlas->layout[*currentChar - 32].getAdvance();
+            currentChar++;
         }
-        texture.img = 
-        {
-            .width = (uint32_t)surf->w,
-            .height = (uint32_t)surf->h
-        };
 
-        texture.width = texture.img.width;
-        texture.height = texture.img.height;
+            
+        font.fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+        float rightBound = cursor + right;
+            
+        float horizontalSize = (rightBound - leftBound) * font.fontSize;
 
-        size.x = texture.width;
-        size.y = texture.height;
+        font.fontAtlas->layout['A' - 32].getQuadPlaneBounds(left, down, right, up);
+        float verticalSize = (up - down) * font.fontSize;
 
-        texture.img.allocatedImg = renderer->AddImage({surf->pixels, texture.img});
-        SDL_DestroySurface(surf);
+        size = {horizontalSize, verticalSize};
     }
 
     void Label::Draw()
     {
         glm::vec2 offset = GetAlignmentOffset();
-        Renderer::Renderer::GetInstance()->Draw(texture, GetGlobalPosition() + offset, {size.x / texture.img.width, size.y / texture.img.height});
+        Renderer::Renderer::GetInstance()->DrawFont(font.fontAtlas, text.c_str(), GetGlobalPosition() + offset, font.fontSize, font.color);
     }
 
     glm::vec2 Label::GetTextSize()
     {
-        return {texture.width, texture.height};
+        return size;
     }
 }

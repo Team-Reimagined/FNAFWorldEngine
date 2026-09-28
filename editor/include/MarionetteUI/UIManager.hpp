@@ -1,8 +1,7 @@
 #pragma once
+#include "Types/FontAtlas.hpp"
 #include "Util/Singleton.hpp"
-#include <unordered_map>
-#include <string>
-#include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3/SDL.h>
 #include "UIElement.hpp"
 
 namespace FWE::MarionetteUI
@@ -12,8 +11,8 @@ namespace FWE::MarionetteUI
     public:
         void Init();
         void Shutdown();
-        TTF_Font *LoadFont(const char *filePath);
-        TTF_Font *GetDefaultFont();
+        Types::FontAtlas *LoadFont(const char *filePath);
+        Types::FontAtlas *GetDefaultFont();
         void AddUIElementToTree(UIElement *element);
         void Draw();
         void GrabFocus(UIElement *element);
@@ -23,9 +22,8 @@ namespace FWE::MarionetteUI
         void GetElementClicked(glm::vec2 mousePos);
     private:
         bool initalized = false;
-        std::unordered_map<std::string, TTF_Font *> fonts;
         UIElement root;
         UIElement *selected = nullptr;
-        TTF_Font *defaultFont;
+        Types::FontAtlas *defaultFont;
     };
 }

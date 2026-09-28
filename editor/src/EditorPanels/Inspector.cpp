@@ -16,17 +16,17 @@ namespace FWE::Editor
         selectedLabel.MakeInternal(this);
         selectedLabel.topLevel = false;
     }
-
+    
     void Inspector::Draw()
     {
         Panel::Draw();
-        if(selectedNode == nullptr)
+        if(auto selected = selectedNode.lock())
         {
-            noSelectionText.Draw();
+            selectedLabel.Draw();
         }
         else
         {
-            selectedLabel.Draw();
+            noSelectionText.Draw();
         }
     }
 
@@ -38,13 +38,5 @@ namespace FWE::Editor
             return;
         }
         selectedLabel.SetText(node->name.c_str());
-    }
-
-    void Inspector::NodeDeleted(std::shared_ptr<Nodes::Node> node)
-    {
-        if(selectedNode == node)
-        {
-            selectedNode = nullptr;
-        }
     }
 }

@@ -6,6 +6,7 @@
 #include "Renderer/Vulkan.hpp"
 #include "Types/Atlas.hpp"
 #include "Types/Color.hpp"
+#include "Types/FontAtlas.hpp"
 #include "glm/ext/vector_float2.hpp"
 
 namespace FWE::Renderer
@@ -17,6 +18,7 @@ namespace FWE::Renderer
         void Shutdown();
         void Draw(const FWE::Types::Atlas &atlas, glm::vec2 position, glm::vec2 scale, glm::vec2 tileCount = {1, 1}, Types::Color color = 0xFFFFFFFF);
         void Draw(glm::vec2 position, glm::vec2 size, Types::Color color = 0xFFFFFFFF);
+        void DrawFont(const Types::FontAtlas *fontAtlas, const char *text, glm::vec2 position, float fontSize = 12, Types::Color color = 0xFFFFFFFF);
         void Render();
         void SetClearColor(Types::Color color = 0x000000FF);
         AllocatedImage AddImage(const ResourceLoader::ImageResource &image);

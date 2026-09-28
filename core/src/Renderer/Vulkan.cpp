@@ -9,9 +9,12 @@
 #include "Renderer/VulkanImages.hpp"
 #include "Renderer/VulkanPipelines.hpp"
 #include "Types/Color.hpp"
+#include "Types/FontAtlas.hpp"
+#include "glm/ext/vector_float2.hpp"
 
 #include <VkBootstrap.h>
 #include <cstddef>
+#include <cstring>
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
@@ -235,6 +238,7 @@ namespace FWE::Renderer::Vulkan
     void Vulkan::InitPipelines()
     {
         InitMeshPipeline();
+        InitFontPipeline();
     }
 
     void Vulkan::InitMeshPipeline()
@@ -290,6 +294,62 @@ namespace FWE::Renderer::Vulkan
         {
             vkDestroyPipelineLayout(device, meshPipelineLayout, nullptr);
             vkDestroyPipeline(device, meshPipeline, nullptr);
+        });
+    }
+
+    void Vulkan::InitFontPipeline()
+    {
+        VkShaderModule triangleFragShader;
+        if(!Utils::LoadShaderModule("../shaders/Font.frag.spv", device, &triangleFragShader))
+        {
+            Util::Logging::error("Error building fragment shader");
+        }
+        
+        VkShaderModule triangleVertShader;
+        if(!Utils::LoadShaderModule("../shaders/Mesh.vert.spv", device, &triangleVertShader))
+        {
+            Util::Logging::error("Error building vertex shader");
+        }
+
+        VkPushConstantRange bufferRange {};
+        bufferRange.offset = 0;
+        bufferRange.size = sizeof(GPUDrawFontPushConstants);
+        bufferRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo = Utils::PipelineLayoutCreateInfo();
+        pipelineLayoutInfo.pPushConstantRanges = &bufferRange;
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pSetLayouts = &singleImageDescriptorLayout;
+        pipelineLayoutInfo.setLayoutCount = 1;
+
+        VkCheck(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &fontPipelineLayout));
+
+        Utils::PipelineBuilder pipelineBuilder;
+
+        pipelineBuilder.pipelineLayout = fontPipelineLayout;
+
+        pipelineBuilder.SetShaders(triangleVertShader, triangleFragShader);
+        pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
+        pipelineBuilder.SetCullMode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
+        pipelineBuilder.SetMultisamplingNone();
+        pipelineBuilder.DisableBlending();
+        pipelineBuilder.DisableDepthTest();
+
+        pipelineBuilder.SetColorAttachmentFormat(drawImage.imageFormat);
+        pipelineBuilder.SetDepthFormat(VK_FORMAT_UNDEFINED);
+
+        pipelineBuilder.EnableBlendingAlpha();
+
+        fontPipeline = pipelineBuilder.BuildPipeline(device);
+
+        vkDestroyShaderModule(device, triangleFragShader, nullptr);
+        vkDestroyShaderModule(device, triangleVertShader, nullptr);
+
+        mainDeletionQueue.PushFunction([&]()
+        {
+            vkDestroyPipelineLayout(device, fontPipelineLayout, nullptr);
+            vkDestroyPipeline(device, fontPipeline, nullptr);
         });
     }
 
@@ -485,28 +545,7 @@ namespace FWE::Renderer::Vulkan
 
         Utils::TransitionImage(cmd, drawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
-
-        VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
-        vkCmdBeginRendering(cmd, &renderInfo);
-
-        VkViewport viewport = {};
-        viewport.x = 0;
-        viewport.y = 0;
-        viewport.width = drawExtent.width;
-        viewport.height = drawExtent.height;
-        viewport.minDepth = 0.f;
-        viewport.maxDepth = 1.f;
-
-        vkCmdSetViewport(cmd, 0, 1, &viewport);
-
-        VkRect2D scissor = {};
-        scissor.offset.x = 0;
-        scissor.offset.y = 0;
-        scissor.extent.width = drawExtent.width;
-        scissor.extent.height = drawExtent.height;
-
-        vkCmdSetScissor(cmd, 0, 1, &scissor);
+        StartDrawing();
 
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
 
@@ -536,19 +575,8 @@ namespace FWE::Renderer::Vulkan
         frameStarted = true;
     }
 
-    void Vulkan::Draw(glm::vec2 position, glm::vec2 size, FWE::Types::Color color)
+    void Vulkan::StartDrawing()
     {
-        if(!frameStarted)
-        {
-            StartFrame();
-        }
-
-        if(resizeRequested)
-        {
-            StartFrame();
-            //return;
-        }
-
         VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
 
         VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
@@ -571,6 +599,22 @@ namespace FWE::Renderer::Vulkan
         scissor.extent.height = drawExtent.height;
 
         vkCmdSetScissor(cmd, 0, 1, &scissor);
+    }
+
+    void Vulkan::Draw(glm::vec2 position, glm::vec2 size, FWE::Types::Color color)
+    {
+        if(!frameStarted)
+        {
+            StartFrame();
+        }
+
+        if(resizeRequested)
+        {
+            StartFrame();
+            //return;
+        }
+
+        StartDrawing();
 
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
 
@@ -629,28 +673,7 @@ namespace FWE::Renderer::Vulkan
             //return;
         }
 
-        VkRenderingAttachmentInfo colorAttachment = Utils::AttachmentInfo(drawImage.imageView, nullptr, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
-
-        VkRenderingInfo renderInfo = Utils::RenderingInfo(drawExtent, &colorAttachment, nullptr);
-        vkCmdBeginRendering(cmd, &renderInfo);
-
-        VkViewport viewport = {};
-        viewport.x = 0;
-        viewport.y = 0;
-        viewport.width = drawExtent.width;
-        viewport.height = drawExtent.height;
-        viewport.minDepth = 0.f;
-        viewport.maxDepth = 1.f;
-
-        vkCmdSetViewport(cmd, 0, 1, &viewport);
-
-        VkRect2D scissor = {};
-        scissor.offset.x = 0;
-        scissor.offset.y = 0;
-        scissor.extent.width = drawExtent.width;
-        scissor.extent.height = drawExtent.height;
-
-        vkCmdSetScissor(cmd, 0, 1, &scissor);
+        StartDrawing();
 
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
 
@@ -697,6 +720,120 @@ namespace FWE::Renderer::Vulkan
         vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
         vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+
+        vkCmdEndRendering(cmd);
+    }
+
+    void Vulkan::DrawFont(const Types::FontAtlas *fontAtlas, const char *text, glm::vec2 position, float fontSize, Types::Color color)
+    {
+        if(!frameStarted)
+        {
+            StartFrame();
+        }
+
+        if(resizeRequested)
+        {
+            StartFrame();
+            //return;
+        }
+
+        StartDrawing();
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, fontPipeline);
+
+        VkDescriptorSet imageSet = GetCurrentFrame().frameDescriptors.Allocate(device, singleImageDescriptorLayout);
+        {
+            DescriptorWriter writer;
+            writer.WriteImage(0, fontAtlas->image.allocatedImg.imageView, defaultSamplerLinear, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+
+            writer.UpdateSet(device, imageSet);
+        }
+
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, fontPipelineLayout, 0, 1, &imageSet, 0, nullptr);
+
+        GPUDrawFontPushConstants pushConstants;
+        glm::mat4 transform = glm::mat4 {1.f};
+
+        auto convertRange = [](float value, float min1, float max1, float min2, float max2)
+        {
+            return min2 + ((max2 - min2) / max1 - min1) * (value - min1);
+        };
+
+        auto calculateSize = [](const Types::FontAtlas *fontAtlas, float fontSize, const char *text)
+        {
+            const char *currentChar = text;
+            double up, down, left, right;
+            fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+            float leftBound = left;
+            
+            float cursor = 0;
+            while(*(currentChar + 1) != '\0')
+            {
+                cursor += fontAtlas->layout[*currentChar - 32].getAdvance();
+                currentChar++;
+            }
+
+            
+            fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+            float rightBound = cursor + right;
+            
+            float horizontalSize = (rightBound - leftBound) * fontSize;
+
+            fontAtlas->layout['A' - 32].getQuadPlaneBounds(left, down, right, up);
+            float verticalSize = (up - down) * fontSize;
+
+            return glm::vec2{horizontalSize, verticalSize};
+        };
+
+        const char *currentChar = text;
+        glm::vec2 size = calculateSize(fontAtlas, fontSize, text);
+        glm::vec2 correctedPosition = {position.x - size.x / 2, position.y + size.y / 2}; 
+        float cursor = correctedPosition.x;
+        
+        while(*currentChar != '\0')
+        {
+            double up, down, left, right;
+            fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+
+            up *= fontSize;
+            down *= fontSize;
+            left *= fontSize;
+            right *= fontSize;
+
+            float width = right - left;
+            float height = up - down;
+
+            transform[0][0] = convertRange(width, 0, drawExtent.width, 0, 1);
+            transform[1][1] = convertRange(height, 0, drawExtent.height, 0, 1);
+
+            transform[3][0] = convertRange(cursor + left + width / 2, 0, drawExtent.width, -1, 1);
+            transform[3][1] = convertRange(correctedPosition.y - down - height / 2, 0, drawExtent.height, -1, 1);
+
+            fontAtlas->layout[*currentChar - 32].getQuadAtlasBounds(left, down, right, up);
+
+            glm::vec2 uvScale;
+            uvScale.x = convertRange(right - left, 0, fontAtlas->image.width, 0, 1);
+            uvScale.y = convertRange(down - up, 0, fontAtlas->image.height, 0, 1);
+
+            glm::vec2 uvOffset;
+            uvOffset.x = convertRange(left, 0, fontAtlas->image.width, 0, 1);
+            uvOffset.y = convertRange(up, 0, fontAtlas->image.height, 0, 1);
+
+            pushConstants.worldMatrix = transform;
+            pushConstants.vertexBuffer = rectangle.vertexBufferAddress;
+            pushConstants.uvScale = uvScale;
+            pushConstants.uvOffset = uvOffset;
+            pushConstants.color = color;
+            pushConstants.scale = fontSize / fontAtlas->scale;
+
+            vkCmdPushConstants(cmd, fontPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GPUDrawFontPushConstants), &pushConstants);
+            vkCmdBindIndexBuffer(cmd, rectangle.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+            vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+
+            cursor += fontAtlas->layout[*currentChar - 32].getAdvance() * fontSize;
+            currentChar++;
+        }
 
         vkCmdEndRendering(cmd);
     }

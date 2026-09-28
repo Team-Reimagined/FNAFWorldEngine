@@ -1,13 +1,13 @@
 #pragma once
 
-#include <SDL3_ttf/SDL_ttf.h>
 #include "Types/Color.hpp"
+#include "Types/FontAtlas.hpp"
 
 namespace FWE::MarionetteUI
 {
     struct Font
     {
-        TTF_Font *font;
+        Types::FontAtlas *fontAtlas;
         float fontSize = 12;
         Types::Color color = 0xFFFFFFFF;
     };

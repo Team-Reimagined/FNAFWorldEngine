@@ -2,7 +2,7 @@
     "SceneName": "TestScene",
     "TestScene":
     {
-        "ChildCount": 3,
+        "ChildCount": 1,
         "Children":
         [
             {
@@ -19,47 +19,50 @@
                     480
                 ],
                 "Tile": false,
-                "ChildCount": 0
-            },
-            {
-                "Type": "AnimatedSprite",
-                "Name": "Freddy",
-                "Position": [300, 240],
-                "Scale": [1, 1],
-                "Atlas":
+                "ChildCount": 2,
+                "Children":
                 [
-                    "resources/FreddyBonnieAtlas.png",
-                    0,
-                    0,
-                    250,
-                    250
-                ],
-                "Tile": false,
-                "Framerate": 30,
-                "CurrentFrame": 0,
-                "FrameCount": 11,
-                "Playing": true,
-                "ChildCount": 0
-            },
-            {
-                "Type": "AnimatedSprite",
-                "Name": "Bonnie",
-                "Position": [500, 240],
-                "Scale": [1, 1],
-                "Atlas":
-                [
-                    "resources/FreddyBonnieAtlas.png",
-                    0,
-                    250,
-                    250,
-                    250
-                ],
-                "Tile": false,
-                "Framerate": 30,
-                "CurrentFrame": 0,
-                "FrameCount": 11,
-                "Playing": true,
-                "ChildCount": 0
+                    {
+                        "Type": "AnimatedSprite",
+                        "Name": "Freddy",
+                        "Position": [-100, 0],
+                        "Scale": [1, 1],
+                        "Atlas":
+                        [
+                            "resources/FreddyBonnieAtlas.png",
+                            0,
+                            0,
+                            250,
+                            250
+                        ],
+                        "Tile": false,
+                        "Framerate": 30,
+                        "CurrentFrame": 0,
+                        "FrameCount": 11,
+                        "Playing": true,
+                        "ChildCount": 0
+                    },
+                    {
+                        "Type": "AnimatedSprite",
+                        "Name": "Bonnie",
+                        "Position": [100, 0],
+                        "Scale": [1, 1],
+                        "Atlas":
+                        [
+                            "resources/FreddyBonnieAtlas.png",
+                            0,
+                            250,
+                            250,
+                            250
+                        ],
+                        "Tile": false,
+                        "Framerate": 30,
+                        "CurrentFrame": 0,
+                        "FrameCount": 11,
+                        "Playing": true,
+                        "ChildCount": 0
+                    }
+                ]
             }
         ]
     }

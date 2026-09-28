@@ -44,6 +44,16 @@ struct GPUDrawPushConstants
     FWE::Types::Color color;
 };
 
+struct GPUDrawFontPushConstants
+{
+    glm::mat4 worldMatrix;
+    VkDeviceAddress vertexBuffer;
+    glm::vec2 uvScale;
+    glm::vec2 uvOffset;
+    FWE::Types::Color color;
+    float scale;
+};
+
 inline void VkCheck(VkResult result)
 {
     if (result)

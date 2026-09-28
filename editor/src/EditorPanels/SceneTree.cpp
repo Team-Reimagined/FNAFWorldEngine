@@ -2,16 +2,14 @@
 #include "EditorPanels/Inspector.hpp"
 #include "MarionetteUI/Label.hpp"
 #include "MarionetteUI/UIElement.hpp"
-#include "MarionetteUI/UIManager.hpp"
 #include "Nodes/Node.hpp"
 #include "SDL3/SDL_clipboard.h"
 #include "Scenes/Scene.hpp"
 #include "Util/Logging.hpp"
 #include "glm/ext/vector_float2.hpp"
 #include <cstddef>
+#include <cstdint>
 #include <memory>
-#include <utility>
-#include <vector>
 
 namespace FWE::Editor
 {
@@ -32,34 +30,28 @@ namespace FWE::Editor
         nodeRightClickPanel.AddOption("Delete node", [=, this](){DeleteNode();});
     }
 
-    void SceneTree::LoadTreeRecursive(std::shared_ptr<Nodes::Node> node, int indentationAmount)
-    {
-        const float indentationSize = 8;
-        const float fontSize = 16;
-        elements.emplace_back(node, MarionetteUI::Label({indentationAmount * indentationSize, 0}, node->name.c_str(), {MarionetteUI::UIManager::GetInstance()->GetDefaultFont(), fontSize, 0xFFFFFFFF}));
-        for(size_t i = 0; i < node->GetChildrenCount(); i++)
-        {
-            LoadTreeRecursive(node->GetChild(i), indentationAmount + 1);
-        }
-    }
-
-    void SceneTree::LoadTree()
-    {
-        std::shared_ptr<Nodes::Node> root = scene->GetRoot();
-        LoadTreeRecursive(root, 1);
-    }
-
     void SceneTree::SetScene(Scenes::Scene *scene)
     {
-        elements.clear();
         this->scene = scene;
         sceneName.SetText(scene->GetName());
-        LoadTree();
     }
 
     void SceneTree::SetInspector(Inspector *inspector)
     {
         this->inspector = inspector;
+    }
+    
+    static void DrawRecursive(std::shared_ptr<Nodes::Node> currentNode, MarionetteUI::Label &label, int &elementsDrawn, int indentationAmount, float ySeparation, float yOffset)
+    {
+        const float indentationSize = 4;
+        const float xOffset = 10;
+        label.position = {++indentationAmount * indentationSize + xOffset, yOffset + ++elementsDrawn * ySeparation};
+        label.SetText(currentNode->name.c_str());
+        label.Draw();
+        for(const auto child : currentNode->GetChildren())
+        {
+            DrawRecursive(child, label, elementsDrawn, indentationAmount + 1, ySeparation, yOffset);
+        }
     }
 
     void SceneTree::Draw()
@@ -67,11 +59,32 @@ namespace FWE::Editor
         Panel::Draw();
         sceneName.Draw();
         int elementsDrawn = 0;
-        for(auto &i : elements)
+        for(const auto child : scene->GetRoot()->GetChildren())
         {
-            i.nameLabel.position.y = yOffset + elementsDrawn++ * ySeparation;
-            i.nameLabel.Draw();
+            DrawRecursive(child, nodeName, elementsDrawn, 1, ySeparation, yOffset);
         }
+    }
+
+    static void FindNodeSelectedRecursive(uint32_t index, uint32_t &currentIndex, Scenes::Scene *scene, std::shared_ptr<Nodes::Node> currentNode, std::shared_ptr<Nodes::Node> &foundNode)
+    {
+        if(index == currentIndex)
+        {
+            foundNode = currentNode;
+            return;
+        }
+        for(const auto child : currentNode->GetChildren())
+        {
+            FindNodeSelectedRecursive(index, ++currentIndex, scene, child, foundNode);
+        }
+    }
+
+    static std::shared_ptr<Nodes::Node> FindNodeSelected(uint32_t index, Scenes::Scene *scene)
+    {
+        std::shared_ptr<Nodes::Node> root = scene->GetRoot();
+        std::shared_ptr<Nodes::Node> found = nullptr;
+        uint32_t currentIndex = 0;
+        FindNodeSelectedRecursive(index, currentIndex, scene, root, found);
+        return found;
     }
 
     void SceneTree::OnLeftClick()
@@ -85,12 +98,14 @@ namespace FWE::Editor
         float mouseY;
         SDL_GetMouseState(NULL, &mouseY);
         int elementSelected = (mouseY - yOffset) / ySeparation;
-        if(elementSelected > rootIndex && elementSelected < elements.size())
+        if(elementSelected > rootIndex)
         {
-            inspector->SetNodeInspected(elements[elementSelected].node);
+            selectedNode = FindNodeSelected(elementSelected, scene);
+            inspector->SetNodeInspected(selectedNode.lock());
         }
         else
         {
+            selectedNode.reset();
             inspector->SetNodeInspected();
         }
     }
@@ -101,9 +116,9 @@ namespace FWE::Editor
         float mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
         int elementSelected = (mouseY - yOffset) / ySeparation;
-        if(elementSelected < elements.size())
+        selectedNode = FindNodeSelected(elementSelected, scene);
+        if(!selectedNode.expired())
         {
-            selectedNode = elements[elementSelected].node;
             if(elementSelected == rootIndex)
             {
                 rootRightClickPanel.ShowPanel({mouseX, mouseY});
@@ -123,7 +138,10 @@ namespace FWE::Editor
 
     void SceneTree::CopyName()
     {
-        SDL_SetClipboardText(selectedNode->name.c_str());
+        if(auto selected = selectedNode.lock())
+        {
+            SDL_SetClipboardText(selected->name.c_str());
+        }
     }
 
     void SceneTree::AddNode()
@@ -133,16 +151,9 @@ namespace FWE::Editor
 
     void SceneTree::DeleteNode()
     {
-        for(size_t i = 0; i < elements.size(); i++)
+        if(auto selected = selectedNode.lock())
         {
-            if(elements[i].node == selectedNode)
-            {
-                std::swap(elements[i], elements.back());
-                elements.pop_back();
-                inspector->NodeDeleted(selectedNode);
-                selectedNode->RemoveFromTree();
-                selectedNode = nullptr;
-            }
+            selected->RemoveFromTree();
         }
     }
 }

@@ -2,6 +2,7 @@
 #include "MarionetteUI/UIElement.hpp"
 #include "SDL3/SDL_keycode.h"
 #include "Types/Color.hpp"
+#include "Types/FontAtlas.hpp"
 
 namespace FWE::MarionetteUI
 {
@@ -52,7 +53,7 @@ namespace FWE::MarionetteUI
         placeholderLabel.SetText(str);
     }
 
-    void EditableLabel::SetFont(TTF_Font *font)
+    void EditableLabel::SetFont(Types::FontAtlas *font)
     {
         userLabel.SetFont(font);
         placeholderLabel.SetFont(font);

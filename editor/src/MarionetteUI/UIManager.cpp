@@ -1,7 +1,7 @@
 #include "MarionetteUI/UIManager.hpp"
 #include "Input/InputManager.hpp"
 #include "MarionetteUI/UIElement.hpp"
-#include "Renderer/Renderer.hpp"
+#include "ResourceLoader/FontLoader.hpp"
 #include "SDL3/SDL_events.h"
 #include "SDL3/SDL_mouse.h"
 
@@ -13,8 +13,6 @@ namespace FWE::MarionetteUI
         {
             return;
         }
-        TTF_Init();
-        SDL_StartTextInput(Renderer::Renderer::GetInstance()->GetWindow());
         defaultFont = LoadFont("resources/fonts/fnaf_world_font.ttf");
         Input::InputManager::GetInstance()->AddInputCallback([](const SDL_Event *event){UIManager::GetInstance()->ProccessInputEvent(event);});
         root.blockMouse = false;
@@ -23,27 +21,13 @@ namespace FWE::MarionetteUI
 
     void UIManager::Shutdown()
     {
-        for(auto &[str, font] : fonts)
-        {
-            TTF_CloseFont(font);
-        }
-        fonts.clear();
-        TTF_Quit();
-        SDL_StopTextInput(Renderer::Renderer::GetInstance()->GetWindow());
+
     }
 
-    TTF_Font *UIManager::LoadFont(const char *filePath)
+    Types::FontAtlas *UIManager::LoadFont(const char *filePath)
     {
-        if(fonts.find(filePath) != fonts.end())
-        {
-            return fonts.at(filePath);
-        }
-        else
-        {
-            TTF_Font *font = TTF_OpenFont(filePath, 12);
-            fonts.insert({filePath, font});
-            return font;
-        }
+        ResourceLoader::FontLoader *loader = ResourceLoader::FontLoader::GetInstance();
+        return loader->LoadFont(filePath);
     }
 
     template <typename T> bool IsElementType(UIElement *element)
@@ -142,7 +126,7 @@ namespace FWE::MarionetteUI
         DrawRecursive(&root);  
     }
 
-    TTF_Font *UIManager::GetDefaultFont()
+    Types::FontAtlas *UIManager::GetDefaultFont()
     {
         return defaultFont;
     }

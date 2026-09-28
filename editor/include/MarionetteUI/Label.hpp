@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "Types/Atlas.hpp"
+#include "Types/FontAtlas.hpp"
 #include "UIElement.hpp"
 #include "Font.hpp"
 
@@ -12,16 +12,15 @@ namespace FWE::MarionetteUI
     public:
         Label(glm::vec2 position, const char *str, Font font, HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left, VerticalAlignment verticalAlignnment = VerticalAlignment::Top);
         void SetText(const char *str);
-        void SetFont(TTF_Font *font);
+        void SetFont(Types::FontAtlas *font);
         void SetFontSize(float size);
         void SetFontColor(Types::Color color);
         void Draw() override;
         glm::vec2 GetTextSize();
     private:
-        void Generate();
+        void SetTextSize();
     private:
         std::string text;
         Font font;
-        Types::Atlas texture;
     };
 }
