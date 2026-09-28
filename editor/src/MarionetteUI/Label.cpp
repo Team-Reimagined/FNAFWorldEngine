@@ -45,18 +45,36 @@ namespace FWE::MarionetteUI
     {
         const char *currentChar = text.c_str();
         double up, down, left, right;
-        font.fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+        int index = *currentChar - 32;
+        while (index < 0)
+        {
+            currentChar++;
+            index = *currentChar - 32;
+        }
+        font.fontAtlas->layout[index].getQuadPlaneBounds(left, down, right, up);
         float leftBound = left;
             
         float cursor = 0;
         while(*(currentChar + 1) != '\0')
         {
-            cursor += font.fontAtlas->layout[*currentChar - 32].getAdvance();
+            index = *currentChar - 32;
+            if(index < 0)
+            {
+                currentChar++;
+                continue;
+            }
+            cursor += font.fontAtlas->layout[index].getAdvance();
             currentChar++;
         }
 
+        index = *currentChar - 32;
+        while (index < 0)
+        {
+            currentChar--;
+            index = *currentChar - 32;
+        }
             
-        font.fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+        font.fontAtlas->layout[index].getQuadPlaneBounds(left, down, right, up);
         float rightBound = cursor + right;
             
         float horizontalSize = (rightBound - leftBound) * font.fontSize;

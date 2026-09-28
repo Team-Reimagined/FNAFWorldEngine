@@ -763,18 +763,36 @@ namespace FWE::Renderer::Vulkan
         {
             const char *currentChar = text;
             double up, down, left, right;
-            fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+            int index = *currentChar - 32;
+            while(index < 0)
+            {
+                currentChar++;
+                index = *currentChar - 32;
+            }
+            fontAtlas->layout[index].getQuadPlaneBounds(left, down, right, up);
             float leftBound = left;
             
             float cursor = 0;
             while(*(currentChar + 1) != '\0')
             {
-                cursor += fontAtlas->layout[*currentChar - 32].getAdvance();
+                index = *currentChar - 32;
+                if(index < 0)
+                {
+                    currentChar++;
+                    continue;
+                }
+                cursor += fontAtlas->layout[index].getAdvance();
                 currentChar++;
             }
 
+            index = *currentChar - 32;
+            while (index < 0)
+            {
+                currentChar--;
+                index = *currentChar - 32;
+            }
             
-            fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+            fontAtlas->layout[index].getQuadPlaneBounds(left, down, right, up);
             float rightBound = cursor + right;
             
             float horizontalSize = (rightBound - leftBound) * fontSize;
@@ -793,7 +811,13 @@ namespace FWE::Renderer::Vulkan
         while(*currentChar != '\0')
         {
             double up, down, left, right;
-            fontAtlas->layout[*currentChar - 32].getQuadPlaneBounds(left, down, right, up);
+            int index = *currentChar - 32;
+            if(index < 0)
+            {
+                currentChar++;
+                continue;
+            }
+            fontAtlas->layout[index].getQuadPlaneBounds(left, down, right, up);
 
             up *= fontSize;
             down *= fontSize;
@@ -809,7 +833,7 @@ namespace FWE::Renderer::Vulkan
             transform[3][0] = convertRange(cursor + left + width / 2, 0, drawExtent.width, -1, 1);
             transform[3][1] = convertRange(correctedPosition.y - down - height / 2, 0, drawExtent.height, -1, 1);
 
-            fontAtlas->layout[*currentChar - 32].getQuadAtlasBounds(left, down, right, up);
+            fontAtlas->layout[index].getQuadAtlasBounds(left, down, right, up);
 
             glm::vec2 uvScale;
             uvScale.x = convertRange(right - left, 0, fontAtlas->image.width, 0, 1);

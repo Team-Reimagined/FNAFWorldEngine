@@ -52,5 +52,5 @@ void main()
     vec4 color = unpackUnorm4x8(PushConstants.colorPacked);
 // 	outFragColor = texture(displayTexture, outUV + PushConstants.uvOffset) * colorMod;
 
-	outFragColor = vec4(color.r, color.b, color.g, opacity);
+	outFragColor = vec4(color.r, color.b, color.g, opacity * color.a);
 }
